@@ -163,7 +163,10 @@ export function init(root) {
   const lens = new THREE.Mesh(new THREE.CircleGeometry(0.0048, 20), new THREE.MeshBasicMaterial({ color: 0x1b6fa0 })); lens.position.set(0, -0.0165, -0.0366); pitchG.add(lens);
   const sensor = new THREE.Object3D(); sensor.position.set(0, 0.0185, -0.0392); pitchG.add(sensor);     // тук е VL53L5CX
 
-  const rearMount = new THREE.Object3D(); rearMount.position.set(0, 0.03, 0.0375); tilt.add(rearMount);
+  // VL53L1X отзад на главата: платката на тила, лъчът в рамката на IMU на главата (като облака отпред), но назад
+  const rearBoard = new THREE.Mesh(new THREE.BoxGeometry(0.026, 0.016, 0.003), M.visor); rearBoard.position.set(0, 0.006, 0.0372); pitchG.add(rearBoard);
+  const rearSensor = new THREE.Object3D(); rearSensor.position.set(0, 0.006, 0.0392); pitchG.add(rearSensor);
+  const rearMount = new THREE.Group(); scene.add(rearMount);
   const rearGeo = new THREE.ConeGeometry(Math.tan(13.5 * D2R), 1, 16, 1, true).translate(0, -0.5, 0).rotateX(-Math.PI / 2);   // връх в 0, основа по +Z
   const rearCone = new THREE.Group(); rearMount.add(rearCone);
   rearCone.add(new THREE.Mesh(rearGeo, new THREE.MeshBasicMaterial({ color: 0xa78bfa, transparent: true, opacity: 0.055, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending })));
@@ -310,19 +313,21 @@ export function init(root) {
       if (blink > 0) { blink -= dt; sy = Math.min(1, Math.max(0.08, Math.abs(blink - 0.07) / 0.07)); }
       eyeMeshes[0].scale.y = eyeMeshes[1].scale.y = sy;
 
-      // задният лъч
+      // облакът: ориентация по IMU на главата, начало — в сензора
+      robot.updateMatrixWorld(true);
+      sensor.getWorldPosition(cloud.position);
+      _e.set(h.pitch * D2R, -h.heading * D2R, -h.roll * D2R, 'YXZ');
+      cloud.quaternion.setFromEuler(_e);
+
+      // задният лъч: от тила на главата назад (+Z в същата рамка), върти се с главата
+      rearSensor.getWorldPosition(rearMount.position);
+      rearMount.quaternion.copy(cloud.quaternion);
       const rr = s.rear;
       if (rr.ok && rr.mm != null && rr.mm > 0) {
         const d = rr.mm / 1000;
         rearCone.visible = rearDot.visible = true;
         rearCone.scale.set(d, d, d); rearDot.position.set(0, 0, d);
       } else { rearCone.visible = rearDot.visible = false; }
-
-      // облакът: ориентация по IMU на главата, начало — в сензора
-      robot.updateMatrixWorld(true);
-      sensor.getWorldPosition(cloud.position);
-      _e.set(h.pitch * D2R, -h.heading * D2R, -h.roll * D2R, 'YXZ');
-      cloud.quaternion.setFromEuler(_e);
       floorGlow.rotation.y = -yaw * D2R;
 
       const tof = s.tof;
