@@ -4,8 +4,10 @@
 // точно над СТОП: пръст, който цели СТОП, никога не хваща джойстик.
 const STOP_GUARD_PX = 24;
 const nearStop = (ev) => {
-  const s = document.getElementById('stopbar');
-  return !!s && ev.clientY > s.getBoundingClientRect().top - STOP_GUARD_PX;
+  const s = document.getElementById('stopbar');      // СТОП е горе в лентата: пазим около него, не под него
+  if (!s) return false;
+  const r = s.getBoundingClientRect();
+  return ev.clientY < r.bottom + STOP_GUARD_PX && ev.clientX > r.left - STOP_GUARD_PX && ev.clientX < r.right + STOP_GUARD_PX;
 };
 
 export function stick(el, onMove, onEnd, recenter) {

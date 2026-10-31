@@ -10,7 +10,6 @@
 .tab-btn:hover { color: var(--text); background: rgba(255, 255, 255, .045); }
 .tab-btn.on { color: var(--accent); background: var(--accent-soft); border-color: rgba(60, 200, 255, .34); }
 .tabpane[hidden] { display: none !important; }
-body.has-stop { padding-bottom: calc(92px + env(safe-area-inset-bottom)); }
 @media (min-width: 701px) and (max-width: 1320px) { .tb-chip.hide-s { display: none; } }
 @media (max-width: 700px) {
   .topbar { flex-wrap: wrap; row-gap: 2px; }
@@ -20,25 +19,21 @@ body.has-stop { padding-bottom: calc(92px + env(safe-area-inset-bottom)); }
   .cam-head .small { display: none; }
 }
 
-/* ── СТОП: винаги на екрана, на всеки раздел ── */
-.stopbar {
-  position: fixed; z-index: 60; left: 50%; transform: translateX(-50%);
-  bottom: max(10px, env(safe-area-inset-bottom)); width: min(640px, calc(100% - 20px)); height: 64px;
-  touch-action: none; user-select: none; -webkit-user-select: none;
-}
+/* ── СТОП: малък бутон горе в лентата, на всеки раздел ── */
+.stopbar { display: inline-flex; flex: none; touch-action: none; user-select: none; -webkit-user-select: none; }
+.stopbar.loose { position: fixed; z-index: 60; top: max(8px, env(safe-area-inset-top)); right: 10px; }
 .stopbar button {
-  display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; margin: 0;
-  border-radius: 16px; border: 2px solid #ff9aa3; color: #fff; cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none;
-  background: linear-gradient(180deg, #e8404d, #b0222f);
-  font: 800 28px/1 var(--font); letter-spacing: .24em; text-indent: .24em;
-  box-shadow: 0 10px 30px rgba(255, 70, 90, .38), 0 0 0 4px rgba(8, 12, 18, .6), inset 0 1px 0 rgba(255, 255, 255, .28);
+  height: 30px; padding: 0 16px; margin: 0; border-radius: 9px; border: 1px solid #ff8a94; color: #fff; cursor: pointer;
+  touch-action: none; user-select: none; -webkit-user-select: none;
+  background: linear-gradient(180deg, #e8404d, #b0222f); font: 800 13px/1 var(--font); letter-spacing: .14em;
+  box-shadow: 0 2px 10px rgba(255, 70, 90, .3), inset 0 1px 0 rgba(255, 255, 255, .25);
 }
 .stopbar button:active, .stopbar button.sent { background: linear-gradient(180deg, #ff6571, #d12b3a); }
-.stopbar button small { font: 600 11px/1.2 var(--font); letter-spacing: .04em; text-indent: 0; margin-top: 4px; opacity: .85; }
-.stopbar.demo { height: 40px; width: min(340px, calc(100% - 20px)); }
-.stopbar.demo button { flex-direction: row; gap: 10px; background: linear-gradient(180deg, #4a252b, #331a1f); border: 1px solid #6b3a42; border-radius: 12px; color: #c9a0a6; box-shadow: none; cursor: not-allowed; font-size: 16px; letter-spacing: .18em; text-indent: 0; }
-.stopbar.demo button small { margin: 0; letter-spacing: 0; }
-body.demo-stop { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
+.stopbar.demo button { background: #331a1f; border-color: #6b3a42; color: #9a7a80; box-shadow: none; cursor: not-allowed; }
+@media (max-width: 700px) {
+  .tb-clock { display: none; }              /* на телефона часовникът е горе в самия телефон: мястото е за СТОП */
+  .stopbar button { height: 28px; padding: 0 12px; letter-spacing: .08em; }
+}
 
 /* ── общи елементи ── */
 .btn {
