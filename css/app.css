@@ -117,6 +117,10 @@ pre.con {
 .ctl-cam .cam-img { object-fit: contain; }
 .camcfg { padding: 0 12px 10px; }
 .camcfg .btnrow { margin-top: 6px; }
+/* редовете на менюто на камерата са същите като „Главата следи очите“, само по-близо един до друг */
+.camcfg .follow { margin-top: 6px; padding-top: 6px; gap: 6px 10px; }
+.camcfg .follow .btnrow { margin-top: 0; gap: 6px; flex: 0 0 auto; flex-wrap: nowrap; }
+.camcfg .follow .kq { margin-left: 8px; }
 .c-prof { padding: 8px 10px; }
 .c-prof .seg button { min-height: 40px; }
 .c-act { padding: 12px; }

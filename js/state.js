@@ -34,7 +34,7 @@ export const state = {
     valid: new Uint8Array(64),
     fov_deg: 45,              // зрителното поле по хоризонтала и по вертикала
   },
-  rear: { ok: false, mm: null },       // VL53L1X отзад на главата, гледа назад и се върти с нея (драйверът предстои)
+  rear: { ok: false, mode: 0, mm: null },   // VL53L1X отзад на главата, гледа назад и се върти с нея; mode 0 не мери, 1 късо, 2 дълго
   body: {                     // тялото (XIAO ESP32-C5), STATE2 на 100 Hz и STATE на 20 Hz
     online: false,
     state: '—', fault: '—', controller: 0,

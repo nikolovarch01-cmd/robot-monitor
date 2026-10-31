@@ -36,7 +36,7 @@ export function makeSt(s, tick) {
       cut: [false, false], sm: 'on', cal: true, capset: 7.5, cap: [7.5, 7.5], us: [Math.round(sv.pan.us), Math.round(sv.tilt.us)],
       wd: 0, gr: true, rear: true,
     },
-    c: { ok: true, w: 1280, h: 960, fps: 29.8, net: 24.1, q: 60, kb: 62 },
+    c: { ok: true, w: 1280, h: 960, fps: 29.8, net: 24.1, q: 60, kb: 62, rz: '1280x960', z: 1, bb: 'auto', gr: 1.52, gb: 1.18 },
     cur: r2((bt.a || 0)), isv: r2(sv.current_a || 0), base: 0.42, imot: 0.8,
     g: { fix: false, sats: 0, lat: 0, lon: 0, spd: 0, n: 0, time: '' },
     d: { v: 0, w: 0, prof: 1, fresh: true },

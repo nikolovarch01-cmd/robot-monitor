@@ -68,8 +68,12 @@ export function init(root) {
         <div class="ct cam-head"><span>Камера</span><span class="ct-r"><span class="small" data-r="camInfo">—</span><button class="btn mini" type="button" data-act="camcfg">⚙ Камера</button></span></div>
         <div class="ctl-cam" data-r="camHost"></div>
         <div class="camcfg" data-r="camCfg" hidden>
-          <div class="btnrow"><button class="btn mini" type="button" data-rez="800">800×640</button><button class="btn mini" type="button" data-rez="1280">1280×960</button><button class="btn mini" type="button" data-rez="1920">1920×1080</button></div>
-          <div class="btnrow"><button class="btn mini" type="button" data-q="40">кач. 40</button><button class="btn mini" type="button" data-q="60">кач. 60</button><button class="btn mini" type="button" data-q="80">кач. 80</button></div>
+          <div class="follow"><span class="k">Размер</span><span class="seg seg-sm" data-r="segRez"><button type="button" data-rez="640x480">640×480</button><button type="button" data-rez="800x640">800×640</button><button type="button" data-rez="1280x960">1280×960</button><button type="button" data-rez="1920x1080">1920×1080</button></span></div>
+          <div class="follow"><span class="k">Мащаб</span><span class="seg seg-sm" data-r="segZoom"><button type="button" data-zoom="1">1×</button><button type="button" data-zoom="2">2×</button><button type="button" data-zoom="4">4×</button></span>
+            <span class="k kq">Качество</span><span class="seg seg-sm" data-r="segQ"><button type="button" data-q="40">40</button><button type="button" data-q="60">60</button><button type="button" data-q="80">80</button></span></div>
+          <div class="follow"><span class="k">Бяло</span><span class="seg seg-sm" data-r="segBb"><button type="button" data-bb="auto">Авто</button><button type="button" data-bb="den">Дневна</button><button type="button" data-bb="oblak">Облачно</button><button type="button" data-bb="krushka">Крушка</button><button type="button" data-bb="lum">Луминесц.</button></span>
+            <span class="btnrow"><button class="btn mini" type="button" data-warm="-1" title="Малко повече синьо">по-студено</button><button class="btn mini" type="button" data-warm="1" title="Малко повече червено">по-топло</button></span>
+            <span class="small dim" data-r="bbInfo">—</span></div>
         </div>
       </div>
       <div class="card c-prof">
@@ -162,10 +166,17 @@ export function init(root) {
       sendOrWarn({ mode: t.dataset.mode });
     } else if (t.dataset.p !== undefined) {
       sendOrWarn({ prof: +t.dataset.p });
-    } else if (t.dataset.rez) {
+    } else if (t.dataset.rez || t.dataset.zoom) {          // размер или мащаб: камерата се прави наново за около половин секунда
       setT(R.camInfo, 'сменям...');
-      try { await fetch(url('/api/cam?rez=' + t.dataset.rez), { method: 'POST' }); } catch (e) { /* пак */ }
+      try { await fetch(url('/api/cam?' + (t.dataset.rez ? 'rez=' + t.dataset.rez : 'zoom=' + t.dataset.zoom)), { method: 'POST' }); } catch (e) { /* пак */ }
       setTimeout(() => { const c = camApi(); if (c) c.restart(); }, 1200);
+    } else if (t.dataset.bb) {                             // баланс на бялото: готов режим
+      fetch(url('/api/cam?bb=' + t.dataset.bb), { method: 'POST' }).catch(() => {});
+    } else if (t.dataset.warm) {                           // по-топло/по-студено: червеното и синьото в обратни посоки от сегашното
+      const c = (last && last.c) || {};
+      if (!c.gr || !c.gb) return;
+      const k = 1 + 0.05 * +t.dataset.warm, lim = (v) => Math.min(3.99, Math.max(0.5, v));
+      fetch(url('/api/cam?gr=' + lim(c.gr * k).toFixed(2) + '&gb=' + lim(c.gb / k).toFixed(2)), { method: 'POST' }).catch(() => {});
     } else if (t.dataset.q) {
       fetch(url('/api/cam?q=' + t.dataset.q), { method: 'POST' }).catch(() => {});
     } else if (t.dataset.follow) {
@@ -298,6 +309,12 @@ export function init(root) {
 
     const c = s.c || {};
     setT(R.camInfo, c.ok ? c.w + '×' + c.h + ' · ' + fx(c.fps, 0) + ' прави / ' + fx(c.net, 1) + ' стигат · ' + c.kb + ' kB · к' + c.q : 'няма камера');
+    // сегашните избори в менюто на камерата
+    for (const x of R.segRez.children) x.classList.toggle('on', x.dataset.rez === c.rz);
+    for (const x of R.segZoom.children) x.classList.toggle('on', +x.dataset.zoom === c.z);
+    for (const x of R.segBb.children) x.classList.toggle('on', x.dataset.bb === c.bb);
+    for (const x of R.segQ.children) x.classList.toggle('on', +x.dataset.q === c.q);
+    setT(R.bbInfo, c.gr ? (c.bb === 'auto' ? 'автоматичен' : c.bb === 'ruchno' ? 'ръчен' : 'готов') + ' · червено ' + fx(c.gr, 2) + ' · синьо ' + fx(c.gb, 2) : '—');
 
     const h = s.h || {};
     setT(R.hPitch, h.imu ? fx(h.p, 1) + '°' : '—');

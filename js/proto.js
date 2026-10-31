@@ -188,6 +188,7 @@ export function decode(buf) {
       }
       case 9: { // отзад
         state.rear.ok = dv.getUint8(p) !== 0;
+        state.rear.mode = dv.getUint8(p + 1);
         const mm = dv.getInt16(p + 2, true);
         state.rear.mm = mm > 0 ? mm : null;
         break;
