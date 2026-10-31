@@ -31,6 +31,10 @@ function horizonSvg(withText) {
   return g;
 }
 
+let api = null;
+// За приложните раздели: { stage, mount(host), setActive(bool), restart(), streaming() } (след init)
+export function camApi() { return api; }
+
 export function init(root) {
   const tape = tapeSvg();
   root.innerHTML = `
@@ -60,20 +64,62 @@ export function init(root) {
         <text x="16" y="34" class="cam-info dim">ГЛАВА</text>
       </svg>
     </div>`;
+  const stage = root.querySelector('.cam-stage');
   const img = root.querySelector('.cam-img'), ph = root.querySelector('.cam-ph');
   const hor = root.querySelector('#camHor'), tp = root.querySelector('#camTape');
   const hdg = root.querySelector('#camHdg'), info = root.querySelector('#camInfo'), spd = root.querySelector('#camSpd');
-  let url = null;
-  img.addEventListener('load', () => { img.hidden = false; ph.hidden = true; });
-  img.addEventListener('error', () => { img.hidden = true; ph.hidden = false; });
+  let url = null;          // адресът на потока (от state.camera.url)
+  let shown = null;        // какво е поискано от <img> в момента (адрес или null = нищо)
+  let active = true;       // потокът е нужен: раздел Табло или Управление
+  let retryT = 0;
+  let holdUntil = 0;       // докато старата връзка се затваря, нова не се отваря (сървърът на робота я забелязва на следващия кадър)
+  // Камерата на робота (порт 81) дава картина на ЕДИН зрител. Затова в цялото приложение има само един <img>:
+  // тази рамка (stage) се премества между Табло и Управление, а в другите раздели потокът се спира.
+  const BLANK = 'data:image/gif;base64,R0lGODlhAQABAAAAACw=';
+  function sync() {
+    const want = active && url ? url : null;
+    if (want === shown) return;
+    if (want && performance.now() < holdUntil) return;      // още не: старият поток се затваря
+    shown = want;
+    if (want) {
+      img.src = want + (want.indexOf('?') < 0 ? '?' : '&') + 't=' + Date.now();     // свеж адрес: нова връзка
+    } else {
+      img.src = BLANK;                       // така браузърът затваря връзката към потока
+      img.hidden = true; ph.hidden = false;
+    }
+  }
+  img.addEventListener('load', () => { if (shown) { img.hidden = false; ph.hidden = true; } });
+  img.addEventListener('error', () => {
+    if (!shown) return;
+    img.hidden = true; ph.hidden = false;
+    clearTimeout(retryT);
+    retryT = setTimeout(() => { shown = null; }, 3000);         // пак след 3 s, като в телефона
+  });
+  api = {
+    stage,
+    home: root,
+    // host: елемент, в който да седне рамката (null = обратно в Табло)
+    mount(host) { const to = host || root; if (stage.parentNode !== to) to.insertBefore(stage, to.firstChild); },
+    setActive(v) {
+      v = !!v;
+      if (v === active) return;
+      active = v;
+      if (!v) holdUntil = performance.now() + 400;           // пак пуснат веднага: пауза, докато старата връзка се затвори
+      sync();
+    },
+    // нов поток със свеж адрес: първо се затваря старият, нов се отваря след кратка пауза
+    restart() {
+      if (shown) { img.src = BLANK; img.hidden = true; ph.hidden = false; }
+      shown = null; holdUntil = performance.now() + 400;
+    },
+    streaming() { return !!shown; },
+  };
 
   return {
     update(ctx) {
       const s = ctx.state, h = s.head, c = s.camera;
-      if (c.url !== url) {
-        url = c.url;
-        if (url) img.src = url; else { img.removeAttribute('src'); img.hidden = true; ph.hidden = false; }
-      }
+      if (c.url !== url) url = c.url;
+      sync();
       const pitch = Math.max(-40, Math.min(40, h.pitch));
       setAttr(hor, 'transform', `translate(320 240) rotate(${(-h.roll).toFixed(1)}) translate(0 ${(pitch * KH).toFixed(1)})`);
       const hd = wrap360(h.heading);

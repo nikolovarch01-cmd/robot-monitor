@@ -114,10 +114,12 @@ export function init(root) {
 
       const online = b.online;
       setText(st, online ? b.state : 'няма връзка');
-      setClass(st, 'chip ' + (!online ? 'off' : (b.fault && b.fault !== '—' ? 'bad' : 'accent')));
-      const fault = !!(b.fault && b.fault !== '—');
-      setText(flt, fault ? 'грешка: ' + b.fault : 'без грешка');
-      setClass(flt, 'chip ' + (fault ? 'bad' : 'off'));
+      // „вдигнат“ (FAULT_RUNAWAY: колелата бързат без команда) е очаквано, когато роботът е вдигнат: информация, не тревога
+      const lifted = b.fault === 'вдигнат';
+      const fault = !!(b.fault && b.fault !== '—' && b.fault !== 'няма');
+      setClass(st, 'chip ' + (!online ? 'off' : (fault && !lifted ? 'bad' : 'accent')));
+      setText(flt, lifted ? 'вдигнат' : fault ? 'грешка: ' + b.fault : 'без грешка');
+      setClass(flt, 'chip ' + (lifted ? 'accent' : fault ? 'bad' : 'off'));
       card.classList.toggle("stale", !online);
       flt.hidden = !online;
     },

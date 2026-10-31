@@ -18,6 +18,7 @@ export function init(root) {
       </svg>
       <span class="tb-name">Робот</span>
     </div>
+    <nav class="tabs" id="tabs" aria-label="Раздели"></nav>
     <span class="badge mode-demo" id="tbMode">Демо</span>
     <span class="tb-link"><i class="dot" id="tbDot"></i><span id="tbConn">няма връзка</span></span>
     <span class="tb-chip hide-s"><span class="k">закъснение</span> <b class="num" id="tbRtt">—</b> ms</span>

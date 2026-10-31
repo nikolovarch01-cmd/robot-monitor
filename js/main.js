@@ -11,13 +11,16 @@ const PERF = params.has("perf");      // ?perf — раз в 2 s пише в к�
 
 // Общият обект, който получава всеки изглед в update(ctx): ctx.state, ctx.hist, ctx.now (ms), ctx.dt (s), ctx.slow.
 // ctx.slow е вярно един кадър на 100 ms — за текстовете, които не трябва да трептят.
-const ctx = { state, hist, now: 0, dt: 0.016, slow: false };
+// ctx.tab: кой раздел се вижда (dash | ctl | plot | set | log | sys). Само изгледите на видимия раздел се обновяват.
+const ctx = { state, hist, now: 0, dt: 0.016, slow: false, tab: 'dash' };
 
+// [име, модул, място, в кои раздели се обновява: 'all' | масив; по подразбиране само Табло]
+// Камерата е и в „Управление“: същата рамка (една картина от робота) се мести там.
 const VIEWS = [
-  ['topbar', './ui/topbar.js', '#topbar'],
+  ['topbar', './ui/topbar.js', '#topbar', 'all'],
   ['rates', './ui/rates.js', '#rates'],
   ['instruments', './ui/instruments.js', '#instruments'],
-  ['camera', './ui/camera.js', '#v-cam'],
+  ['camera', './ui/camera.js', '#v-cam', ['dash', 'ctl']],
   ['depth', './ui/depth.js', '#v-depth'],
   ['scene3d', './ui/scene3d.js', '#v-3d'],
   ['battery', './ui/battery.js', '#v-bat'],
@@ -28,6 +31,7 @@ const VIEWS = [
 ];
 
 const views = [];
+let app = null;
 let raf = 0, lastMs = 0, lastSlow = 0, nFrames = 0;
 
 export function frame(ms) {
@@ -36,9 +40,11 @@ export function frame(ms) {
   lastMs = ms; ctx.now = ms;
   ctx.slow = ms - lastSlow >= 100;
   if (ctx.slow) lastSlow = ms;
+  if (app) { try { app.update(ctx); } catch (e) { console.error('[app]', e); app = null; } }
   for (let i = 0; i < views.length; i++) {
     const v = views[i];
     if (v.dead) continue;
+    if (v.tabs !== 'all' && v.tabs.indexOf(ctx.tab) < 0) continue;      // раздел, който не се вижда, не се рисува
     const t0 = PERF ? performance.now() : 0;
     try { v.update(ctx); } catch (e) { v.dead = true; console.error("[" + v.name + "]", e); }
     if (PERF) v.ms = (v.ms || 0) + performance.now() - t0;
@@ -87,17 +93,25 @@ async function boot() {
     });
   }
 
-  await Promise.all(VIEWS.map(async ([name, path, sel]) => {
+  await Promise.all(VIEWS.map(async ([name, path, sel, tabs]) => {
     const host = document.querySelector(sel);
     try {
       const mod = await import(path);
-      if (host) views.push({ name, update: mod.init(host, ctx).update, order: VIEWS.findIndex((x) => x[0] === name) });
+      if (host) views.push({ name, update: mod.init(host, ctx).update, tabs: tabs || ['dash'], order: VIEWS.findIndex((x) => x[0] === name) });
     } catch (e) {
       console.error('[' + name + ']', e);
       if (host) host.insertAdjacentHTML('beforeend', `<div class="miss">„${name}“ не се зареди: ${String(e && e.message || e).slice(0, 120)}</div>`);
     }
   }));
   views.sort((a, b) => a.order - b.order);
+
+  // Раздели, СТОП и JSON каналът към робота (js/app/app.js). Липсващ файл не чупи Табло.
+  try {
+    const { initApp } = await import('./app/app.js');
+    app = initApp({ live, ctx, state, params });
+  } catch (e) {
+    console.error('[app]', e);
+  }
   startLoop();
   if (PERF) setInterval(() => {
     const n = Math.max(1, nFrames);
