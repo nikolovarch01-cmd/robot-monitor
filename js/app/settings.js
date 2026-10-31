@@ -5,6 +5,7 @@ import { getJson, isLive } from './api.js';
 import { esc, num, toast, DEMO_NOTE } from './ui.js';
 import { lockDemo } from './lock.js';
 import { initCalib } from './calib.js';
+import { initChasti } from './chasti.js';
 import { centrStart, centrDone, curZeroGo, himuCalGo } from './actions.js';
 
 const PST = { 0: ['✓', 'ok'], 5: ['✓✓', 'ok'], 1: ['няма', 'bad'], 2: ['извън', 'bad'], 3: ['в покой', 'bad'], 4: ['само чет.', 'bad'] };
@@ -39,6 +40,7 @@ export function init(root) {
       <div data-r="pGroups"></div>
     </div>
     <div class="set-side">
+      <div class="card c-chasti" data-r="chasti"></div>
       <div class="card c-wiz" data-r="wizCard"></div>
       <div class="card">
         <div class="ct"><span>Главата и сервата</span></div>
@@ -57,6 +59,7 @@ export function init(root) {
   const R = {};
   for (const e of root.querySelectorAll('[data-r]')) R[e.dataset.r] = e;
   const calib = initCalib(R.wizCard);
+  const chasti = initChasti(R.chasti);
 
   const P = { list: [], byId: {}, groups: [], loaded: false };
   let visible = false;
@@ -217,7 +220,7 @@ export function init(root) {
 
   lockDemo(root, !isLive());
   return {
-    show() { visible = true; calib.show(); if (!P.loaded) loadParams(); },
+    show() { visible = true; calib.show(); chasti.show(); if (!P.loaded) loadParams(); },
     hide() { visible = false; calib.hide(); },
     update() {},
   };

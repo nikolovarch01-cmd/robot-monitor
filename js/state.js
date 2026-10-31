@@ -55,7 +55,8 @@ export const state = {
   battery: { v: null, pct: null, a: null, w: null, low: false },
   sound: { playing: false, name: '', volume: 0 },
   camera: { ok: false, w: 0, h: 0, hz: 0, url: null },
-  rates: [],                  // [{id, ime, hz, ok}] веднъж в секунда
+  rates: [],                  // [{id, ime, hz, ok, izk}] веднъж в секунда
+  izk: {},                    // изключените части {tof: true, ...}: от честотите (на живо) или от демото
 };
 
 // История за графиките: пръстен на всеки канал, с времето отделно

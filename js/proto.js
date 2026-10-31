@@ -197,6 +197,8 @@ export function decode(buf) {
         try {
           const j = JSON.parse(new TextDecoder().decode(new Uint8Array(buf, p, len)));
           state.rates = j.r || [];
+          state.izk = {};
+          for (const r of state.rates) if (r.izk) state.izk[r.id] = true;
           state.p4 = j;
         } catch (e) { /* отрязан: следващата секунда */ }
         break;

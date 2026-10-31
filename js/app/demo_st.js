@@ -1,6 +1,6 @@
 // Демо за приложните раздели: измислена телеметрия „st“ (като build_status_json на P4) и измислени отговори на /api/*.
 // Всичко е правдоподобно за вид, без робот. Не се ползва на живо.
-import { hist } from '../state.js';
+import { hist, state } from '../state.js';
 import { COLS } from './logcols.js';
 
 const r1 = (v) => Math.round(v * 10) / 10;
@@ -85,6 +85,12 @@ const SYS = () => ({
   events: ['12:01:07 Тялото: xiao-body 0.9.1 (демо)', '12:01:05 Сервата са центрирани', '12:00:59 P4 стартира'],
 });
 
+// Частите вкл/изкл (командата vkl на P4): в демото се помнят до презареждане
+const DEMO_CHASTI = [
+  { id: 'tof', ime: '8×8 отпред', on: 1, e: 1 }, { id: 'zad', ime: 'Отзад', on: 1, e: 1 },
+  { id: 'ochi', ime: 'Очи', on: 1, e: 1 }, { id: 'zvuk', ime: 'Звук', on: 1, e: 1 }, { id: 'servo', ime: 'Серва', on: 0, e: 1 },
+];
+
 export function fixture(path, post, body) {
   const p = path.split('?')[0];
   if (p === '/api/params') return Promise.resolve({ total: PARAMS.length, got: PARAMS.length, v2: true, groups: GROUPS, p: PARAMS });
@@ -92,6 +98,12 @@ export function fixture(path, post, body) {
   if (p === '/api/sys') return Promise.resolve(SYS());
   if (p === '/api/konzola') {
     const line = String(body || '');
+    const v = /^vkl(?:\s+(\w+)\s+(on|off))?\s*$/.exec(line.trim());
+    if (v) {
+      const c = DEMO_CHASTI.find((x) => x.id === v[1]);
+      if (c) { c.on = v[2] === 'on' ? 1 : 0; state.izk[c.id] = !c.on; }
+      return Promise.resolve(JSON.stringify({ c: DEMO_CHASTI }) + '\n');
+    }
     if (/^oci\b/.test(line)) return Promise.resolve('очите включени\nглавата следи: не\nнастройки: inv не\n');
     return Promise.resolve('Демо: няма робот\n');
   }

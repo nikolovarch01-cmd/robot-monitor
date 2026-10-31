@@ -1,4 +1,5 @@
-// Лента с честотите: всеки датчик с измерено и очаквано Hz. Зелено от 90 %, кехлибар по-ниско, червено без данни.
+// Лента с честотите: всеки датчик с измерено и очаквано Hz. Зелено от 90 %, кехлибар по-ниско, червено без данни,
+// сиво „изкл.“, когато е изключен с ключето (Настройка → Части): изборът не е повреда.
 import { setText, setClass, setStyle, fmt } from './util.js';
 
 // Кратките имена: робот дава 12 реда и пълните не се събират; пълното име е в подсказката
@@ -31,6 +32,13 @@ export function init(root) {
       if (key !== ids) { ids = key; build(list); }
       for (let i = 0; i < list.length; i++) {
         const r = list[i], c = chips[i], ratio = r.ok > 0 ? r.hz / r.ok : 1;
+        if (ctx.state.izk[r.id]) {
+          setClass(c.el, 'rate off');
+          setText(c.b, 'изкл.');
+          setText(c.exp, '');
+          setStyle(c.bar, 'width', '0%');
+          continue;
+        }
         // без очаквана честота и без данни (GPS вкъщи): сиво, не червено
         const cls = r.ok <= 0 && r.hz <= 0 ? 'off' : r.hz <= 0 ? 'bad' : ratio >= 0.9 ? 'good' : 'warn';
         setClass(c.el, 'rate ' + cls);

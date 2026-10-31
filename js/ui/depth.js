@@ -12,7 +12,8 @@ export function init(root) {
     </div>`;
   const cv = root.querySelector('.dp-cv'), ctx2 = cv.getContext('2d');
   const hz = root.querySelector('#dpHz'), mn = root.querySelector('#dpMin'), rear = root.querySelector('#dpRear');
-  let cw = 0, ch = 0, dpr = 1, lastFrame = -1, dirty = true;
+  let cw = 0, ch = 0, dpr = 1, lastFrame = -1, dirty = true, wasOff = false;
+  const EMPTY = { mm: new Int16Array(64).fill(-1), valid: new Uint8Array(64) };
 
   const ro = new ResizeObserver(() => {
     const r = cv.parentElement.getBoundingClientRect();
@@ -52,18 +53,20 @@ export function init(root) {
 
   return {
     update(ctx) {
-      const tof = ctx.state.tof;
+      const tof = ctx.state.tof, off = !!ctx.state.izk.tof;     // изключен с ключето: празна карта, „изкл.“
+      if (off !== wasOff) { wasOff = off; dirty = true; }
       if (tof.frame !== lastFrame || dirty) {
         lastFrame = tof.frame; dirty = false;
-        if (cw) draw(tof);
+        const src = off ? EMPTY : tof;
+        if (cw) draw(src);
         let min = 1e9;
-        for (let i = 0; i < 64; i++) if (tof.valid[i] && tof.mm[i] >= 0 && tof.mm[i] < min) min = tof.mm[i];
+        for (let i = 0; i < 64; i++) if (src.valid[i] && src.mm[i] >= 0 && src.mm[i] < min) min = src.mm[i];
         setText(mn, min < 1e9 ? (min / 1000).toFixed(2) + ' м' : '—');
       }
       if (ctx.slow) {
-        setText(hz, fmt(tof.hz, 1) + ' к/с');
+        setText(hz, off ? 'изкл.' : fmt(tof.hz, 1) + ' к/с');
         const r = ctx.state.rear;
-        setText(rear, r.ok && r.mm != null ? (r.mm / 1000).toFixed(2) + ' м' : '—');
+        setText(rear, ctx.state.izk.zad ? 'изкл.' : r.ok && r.mm != null ? (r.mm / 1000).toFixed(2) + ' м' : '—');
       }
     },
   };

@@ -323,7 +323,7 @@ export function init(root) {
       rearSensor.getWorldPosition(rearMount.position);
       rearMount.quaternion.copy(cloud.quaternion);
       const rr = s.rear;
-      if (rr.ok && rr.mm != null && rr.mm > 0) {
+      if (rr.ok && rr.mm != null && rr.mm > 0 && !s.izk.zad) {
         const d = rr.mm / 1000;
         rearCone.visible = rearDot.visible = true;
         rearCone.scale.set(d, d, d); rearDot.position.set(0, 0, d);
@@ -331,8 +331,9 @@ export function init(root) {
       floorGlow.rotation.y = -yaw * D2R;
 
       const tof = s.tof;
-      cloud.visible = !!tof.ok;
-      if (tof.ok) {
+      const tofOn = !!tof.ok && !s.izk.tof;      // изключен с ключето: облакът го няма
+      cloud.visible = tofOn;
+      if (tofOn) {
         if (tof.fov_deg !== fovCur && tof.fov_deg > 5) buildDirs(tof.fov_deg);
         const kd = 1 - Math.exp(-dt / 0.05), ks = 1 - Math.exp(-dt / 0.09);
         for (let i = 0; i < 64; i++) {

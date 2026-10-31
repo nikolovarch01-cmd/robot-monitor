@@ -255,6 +255,7 @@ function updateRates(t) {
     { id: 'imu', ime: 'IMU на главата', hz: +(j(199.6)).toFixed(1), ok: 200 },
     { id: 'mag', ime: 'Компас', hz: +(j(40)).toFixed(1), ok: 40 },
     { id: 'body', ime: 'Тяло', hz: +(j(100)).toFixed(1), ok: 100 },
-    { id: 'eyes', ime: 'Очи', hz: +(j(62)).toFixed(1), ok: 60 },
+    { id: 'zad', ime: 'VL53L1X отзад', hz: +(j(30.3)).toFixed(1), ok: 30 },
+    { id: 'ochi', ime: 'Очи', hz: +(j(62)).toFixed(1), ok: 60 },
   ];
 }

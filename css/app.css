@@ -216,7 +216,14 @@ pre.con {
 /* ── Настройка ── */
 .set { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: var(--gap); align-items: start; }
 .set-main, .set-side { display: flex; flex-direction: column; gap: var(--gap); min-width: 0; }
-.set-side { position: sticky; top: 8px; max-height: calc(100vh - 150px); overflow-y: auto; scrollbar-width: thin; }
+/* Части: име вляво, сегменти вкл | изкл вдясно (елементът „сегменти“ от каталога) */
+.parts { margin-top: 6px; }
+.part { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 0; border-top: 1px solid var(--line); }
+.part-n { font-size: 13px; font-weight: 600; min-width: 0; }
+.part.none .part-n { color: var(--faint); font-weight: 400; }
+.seg-part { flex: none; width: 150px; }
+.seg-part button[data-on="0"].on { background: rgba(255, 255, 255, .06); color: var(--text); }
+.set-side { position: sticky; top: 58px; max-height: calc(100vh - 150px); overflow-y: auto; scrollbar-width: thin; }
 .filter { margin-top: 10px; }
 details.grp { padding: 0; overflow: hidden; }
 details.grp > summary { padding: 11px 14px; font-weight: 650; font-size: 13.5px; cursor: pointer; list-style: none; user-select: none; }
