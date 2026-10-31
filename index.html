@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="bg">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Робот">
+<meta name="theme-color" content="#080c12">
+<meta name="color-scheme" content="dark">
+<title>Робот · монитор</title>
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uplot@1.6.31/dist/uPlot.min.css">
+<link rel="stylesheet" href="css/monitor.css">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+
+<header class="topbar" id="topbar"></header>
+<div class="rates" id="rates"></div>
+
+<main class="grid">
+  <section class="col col-l" id="instruments"></section>
+
+  <section class="col col-c" id="col-c">
+    <div class="card c-cam"><div id="v-cam"></div><button class="swap-btn" title="Камерата голяма">⇄</button></div>
+    <div class="card c-depth" id="v-depth"></div>
+    <div class="card c-3d"><div id="v-3d"></div><button class="swap-btn" title="3D голямо">⇄</button></div>
+  </section>
+
+  <section class="col col-r">
+    <div class="card c-bat" id="v-bat"></div>
+    <div class="card c-body" id="v-body"></div>
+    <div class="card c-servo" id="v-servo"></div>
+    <div class="card c-sound" id="v-sound"></div>
+  </section>
+</main>
+
+<section class="charts" id="charts"></section>
+
+<script src="https://cdn.jsdelivr.net/npm/uplot@1.6.31/dist/uPlot.iife.min.js"></script>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
