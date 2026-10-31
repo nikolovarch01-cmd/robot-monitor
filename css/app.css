@@ -27,7 +27,9 @@
   touch-action: none; user-select: none; -webkit-user-select: none;
   background: linear-gradient(180deg, #e8404d, #b0222f); font: 800 13px/1 var(--font); letter-spacing: .14em;
   box-shadow: 0 2px 10px rgba(255, 70, 90, .3), inset 0 1px 0 rgba(255, 255, 255, .25);
+  position: relative;
 }
+.stopbar button::after { content: ''; position: absolute; inset: -9px -6px; }   /* малък на вид, докосването хваща 44 px */
 .stopbar button:active, .stopbar button.sent { background: linear-gradient(180deg, #ff6571, #d12b3a); }
 .stopbar.demo button { background: #331a1f; border-color: #6b3a42; color: #9a7a80; box-shadow: none; cursor: not-allowed; }
 @media (max-width: 700px) {
