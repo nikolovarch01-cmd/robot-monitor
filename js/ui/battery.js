@@ -3,7 +3,7 @@ import { setText, fmt, makeBatteryIcon } from './util.js';
 
 export function init(root) {
   root.innerHTML = `
-    <div class="ct"><span>Батерия</span><span class="ct-r" id="batNote">3S Li-ion</span></div>
+    <div class="ct"><span>Батерия</span><span class="ct-r" id="batNote">3S LiPo 1300 mAh</span></div>
     <div class="bat-row">
       <div class="bat-icon"></div>
       <div class="bat-nums">
@@ -21,7 +21,7 @@ export function init(root) {
       if (ctx.slow) {
         setText(pct, b.pct == null ? '—' : Math.round(b.pct) + '%');
         setText(v, fmt(b.v, 2)); setText(a, fmt(b.a, 2)); setText(w, fmt(b.w, 1));
-        setText(note, b.low ? 'ниска!' : '3S Li-ion');
+        setText(note, b.low ? 'ниска!' : '3S LiPo 1300 mAh');
         note.classList.toggle('bad', !!b.low);
       }
     },
