@@ -1,6 +1,6 @@
 // Раздел „Управление“: камера с HUD, профил, два джойстика (движение и глава), режими, серви, наклон на главата,
 // състояние. Всичко от раздел „Управление“ на телефонното приложение; поведението и текстовете са същите.
-import { net, on, sendOrWarn, driveSet, driveRelease, headSet, doStop, onStop, cancelPendingStop } from '../net_ws.js';
+import { net, on, sendOrWarn, driveSet, driveRelease, headSet, onStop, cancelPendingStop } from '../net_ws.js';
 import { stick } from './joystick.js';
 import { esc, fx, STATE_BG, FLAGS, faultInfo, toast, DEMO_NOTE, setT, setH, setC, setW } from './ui.js';
 import { konzola, url, isLive } from './api.js';
@@ -146,7 +146,7 @@ export function init(root) {
   function releaseKeys() { if (keys.size) { keys.clear(); applyKeys(); } }
   document.addEventListener('keydown', (ev) => {
     if (!visible || !net.live || typing(ev.target) || ev.ctrlKey || ev.metaKey || ev.altKey) return;
-    if (ev.code === 'Space') { ev.preventDefault(); if (!ev.repeat) { keys.clear(); doStop(); } return; }
+    if (ev.code === 'Space') return;        // СТОП: stopbar.js, на всеки раздел (onStop изчиства стрелките)
     if (/^Arrow(Up|Down|Left|Right)$/.test(ev.key)) {
       ev.preventDefault();
       if (!keys.has(ev.key)) { keys.add(ev.key); applyKeys(); }

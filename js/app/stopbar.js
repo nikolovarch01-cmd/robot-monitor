@@ -24,6 +24,13 @@ export function initStopbar(live) {
     return;
   }
   b.title = 'СТОП (Space)';
+  // Space е СТОП на всеки раздел, освен докато се пише в поле
+  const typing = (t) => !!t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName));
+  document.addEventListener('keydown', (ev) => {
+    if (ev.code !== 'Space' || typing(ev.target) || ev.ctrlKey || ev.metaKey || ev.altKey) return;
+    ev.preventDefault();
+    if (!ev.repeat) doStop();
+  });
   b.addEventListener('pointerdown', (ev) => { ev.preventDefault(); doStop(); });
   b.addEventListener('click', () => { if (!stopRecent()) doStop(); });      // клавиатура, помощни средства
   bar.addEventListener('contextmenu', (ev) => ev.preventDefault());

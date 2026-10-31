@@ -34,7 +34,9 @@
 .stopbar.demo button { background: #331a1f; border-color: #6b3a42; color: #9a7a80; box-shadow: none; cursor: not-allowed; }
 @media (max-width: 700px) {
   .tb-clock { display: none; }              /* на телефона часовникът е горе в самия телефон: мястото е за СТОП */
-  .stopbar button { height: 28px; padding: 0 12px; letter-spacing: .08em; }
+  .stopbar button { height: 32px; padding: 0 12px; letter-spacing: .08em; }
+  .stopbar button::after { inset: -12px -6px -6px; }     /* 44 px, без да слиза върху разделите (редът е на 7 px) */
+  .topbar { row-gap: 7px; }
 }
 
 /* ── общи елементи ── */
@@ -181,8 +183,8 @@ pre.con {
   .sticks { grid-template-columns: 1fr 1fr; gap: 10px; }
   .stick { width: min(100%, 170px); }
   .keyhint { display: none; }
-  /* Баланс и наклона на главата остават точно над СТОП, докато се гледат камерата и джойстиците */
-  .c-act { position: sticky; bottom: calc(82px + env(safe-area-inset-bottom)); z-index: 20; background: linear-gradient(180deg, #121b27, #0e151f); box-shadow: 0 -10px 26px rgba(0, 0, 0, .55), 0 8px 28px rgba(0, 0, 0, .38); }
+  /* Баланс и наклона на главата остават долу, докато се гледат камерата и джойстиците (СТОП е горе в лентата) */
+  .c-act { position: sticky; bottom: calc(8px + env(safe-area-inset-bottom)); z-index: 20; background: linear-gradient(180deg, #121b27, #0e151f); box-shadow: 0 -10px 26px rgba(0, 0, 0, .55), 0 8px 28px rgba(0, 0, 0, .38); }
 }
 @media (max-width: 700px) {
   .ctl-cam .cam-stage { aspect-ratio: 16 / 10; }
