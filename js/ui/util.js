@@ -1,6 +1,8 @@
 // Малки помощници за изгледите: без зависимости, без алокации в горещите пътища.
 
 export const D2R = Math.PI / 180;
+// Нравите на робота (docs/10): името в командата „nrav“ → името на екрана
+export const NRAVI = { spokoen: 'спокоен', lyubopiten: 'любопитен', nashrek: 'нащрек', sanliv: 'сънлив', umoren: 'уморен' };
 export const R2D = 180 / Math.PI;
 
 export const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);

@@ -200,6 +200,7 @@ export function decode(buf) {
           state.izk = {};
           for (const r of state.rates) if (r.izk) state.izk[r.id] = true;
           state.p4 = j;
+          if (j.nrav) { state.nrav.ime = j.nrav; state.nrav.sam = j.nrav_sam !== 0; state.nrav.ostava_s = j.nrav_s || 0; }
         } catch (e) { /* отрязан: следващата секунда */ }
         break;
       }

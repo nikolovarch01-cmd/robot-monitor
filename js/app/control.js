@@ -8,6 +8,7 @@ import { camApi } from '../ui/camera.js';
 import { distCss } from '../ui/util.js';
 import { lockDemo } from './lock.js';
 import { centrStart, centrDone } from './actions.js';
+import { initNrav } from './nrav.js';
 
 const VMAX = 400, WMAX = 2000;             // mm/s, mrad/s; таваните на профила са в тялото
 const KEY_V = 240, KEY_W = 1200;           // стрелките (около 60% от хода на джойстика)
@@ -89,6 +90,7 @@ export function init(root) {
         </div>
         <div class="keyhint small dim">Клавиатура: стрелките карат · Space = СТОП</div>
       </div>
+      <div class="card c-nrav" data-r="nravCard"></div>
       <div class="card c-misc">
         <button class="btn off" type="button" data-act="off">Изключи робота</button>
       </div>
@@ -333,16 +335,18 @@ export function init(root) {
   on('link', () => { if (last) render(last); });
 
   const camHost = R.camHost;
+  const nrav = initNrav(R.nravCard);
   lockDemo(root, !isLive());
 
   return {
     camHost,
     show() {
       visible = true;
+      nrav.show();
       if (last) render(last);
       readFollow();
     },
     hide() { visible = false; releaseKeys(); driveRelease(); },
-    update() {},
+    update(ctx) { nrav.update(ctx); },
   };
 }

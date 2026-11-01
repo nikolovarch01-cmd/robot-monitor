@@ -98,6 +98,12 @@ export function fixture(path, post, body) {
   if (p === '/api/sys') return Promise.resolve(SYS());
   if (p === '/api/konzola') {
     const line = String(body || '');
+    const nv = /^nrav(?:\s+(\w+)(?:\s+(\d+))?)?\s*$/.exec(line.trim());
+    if (nv) {
+      if (nv[1] === 'sam') { state.nrav.sam = true; state.nrav.ostava_s = 0; }
+      else if (nv[1]) { state.nrav.ime = nv[1]; state.nrav.sam = false; state.nrav.ostava_s = 60 * (+nv[2] || 15); }
+      return Promise.resolve(JSON.stringify({ nrav: state.nrav.ime, sam: state.nrav.sam ? 1 : 0, ostava_s: state.nrav.ostava_s }) + '\n');
+    }
     const v = /^vkl(?:\s+(\w+)\s+(on|off))?\s*$/.exec(line.trim());
     if (v) {
       const c = DEMO_CHASTI.find((x) => x.id === v[1]);

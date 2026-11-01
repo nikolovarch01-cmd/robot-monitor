@@ -247,6 +247,9 @@ function tofFrame(t) {
 }
 
 function updateRates(t) {
+  // нравът: сам избира любопитен; наложеният от „Нрав“ изтича
+  if (!state.nrav.ime) state.nrav.ime = 'lyubopiten';
+  if (!state.nrav.sam && (state.nrav.ostava_s -= 1) <= 0) { state.nrav.sam = true; state.nrav.ostava_s = 0; state.nrav.ime = 'lyubopiten'; }
   const dip = (t % 25 > 21.5 && t % 25 < 24);
   const j = (a) => a * (1 + 0.004 * (rand() - 0.5));
   state.rates = [

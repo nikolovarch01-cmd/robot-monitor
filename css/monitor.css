@@ -309,6 +309,8 @@ b { font-weight: 650; }
 .snd-bars { flex: none; display: flex; align-items: center; gap: 3px; height: 32px; }
 .snd-bars i { display: block; width: 4px; height: 32px; border-radius: 2px; background: currentColor; transform-origin: center; transform: scaleY(.1); }
 .snd-txt { min-width: 0; margin-left: auto; text-align: right; }
+.snd-nrav { flex: none; display: flex; flex-direction: column; align-items: flex-start; gap: 1px; }
+.snd-kak { color: var(--faint); font-size: 10.5px; line-height: 12px; white-space: nowrap; }
 .snd-name { color: var(--text); font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .snd-vol { color: var(--dim); font-size: 11.5px; }
 

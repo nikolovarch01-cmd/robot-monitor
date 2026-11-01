@@ -54,6 +54,7 @@ export const state = {
   },
   battery: { v: null, pct: null, a: null, w: null, low: false },
   sound: { playing: false, name: '', volume: 0 },
+  nrav: { ime: null, sam: true, ostava_s: 0 },   // нравът (docs/10): сам го избира или е наложен още ostava_s секунди
   camera: { ok: false, w: 0, h: 0, hz: 0, url: null },
   rates: [],                  // [{id, ime, hz, ok, izk}] веднъж в секунда
   izk: {},                    // изключените части {tof: true, ...}: от честотите (на живо) или от демото

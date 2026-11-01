@@ -129,6 +129,9 @@ pre.con {
 .c-prof .seg button { min-height: 40px; }
 .c-act { padding: 12px; }
 .act-row { display: flex; gap: 14px; flex-wrap: wrap; align-items: stretch; }
+/* Нрав: „Сам избира“ и петте нрава, по два на ред (бутоните от каталога; избраният е в акцент) */
+.nravi { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.nravi .btn { min-height: 44px; padding: 8px 6px; }
 .modes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; flex: 3 1 360px; }
 .trim { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; flex: 2 1 240px; padding-left: 14px; border-left: 1px solid var(--line-2); }
 .modes .btn, .trim .btn { width: 100%; min-width: 0; padding: 8px 6px; }
