@@ -24,8 +24,9 @@ export function initStopbar(live) {
     return;
   }
   b.title = 'СТОП (Space)';
-  // Space е СТОП на всеки раздел, освен докато се пише в поле
-  const typing = (t) => !!t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName));
+  // Space е СТОП на всеки раздел, освен докато се пише в поле. Плъзгач, отметка и бутон не са писане: и на тях спира.
+  const NE_PISHE = /^(range|checkbox|radio|button|submit|reset|color|file)$/;
+  const typing = (t) => !!t && (t.isContentEditable || /^(TEXTAREA|SELECT)$/.test(t.tagName) || (t.tagName === 'INPUT' && !NE_PISHE.test(t.type)));
   document.addEventListener('keydown', (ev) => {
     if (ev.code !== 'Space' || typing(ev.target) || ev.ctrlKey || ev.metaKey || ev.altKey) return;
     ev.preventDefault();

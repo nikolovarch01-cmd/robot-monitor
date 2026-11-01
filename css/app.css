@@ -491,6 +491,48 @@ pre.con.wiz-out { height: 112px; }
 .raw-cmds summary { cursor: pointer; color: var(--dim); }
 .calstep { padding: 8px 0; border-top: 1px solid var(--line); margin-top: 6px; }
 .calstep .btnrow { margin-top: 6px; }
+/* ── Настройка → Очи (js/app/ochi.js): видът, ключето и числата с плъзгачи по групи ── */
+.oc { display: flex; flex-direction: column; gap: var(--gap); }
+.oc-vidove { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+.oc-vidove .btn { min-height: 44px; padding: 8px 10px; }
+.oc-v1-bel { display: none; padding: 9px 14px 0; }
+.oc-v1 .oc-v1-bel { display: block; }
+.oc-v1 .oc-nov { opacity: .55; }
+.oc-p .oc-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.oc-ime { font-size: 13px; font-weight: 600; min-width: 0; }
+.oc-ime .badge-s { font-weight: 500; margin-left: 4px; white-space: nowrap; }
+.oc-v { display: inline-flex; align-items: center; gap: 6px; flex: none; }
+.oc-num { width: 78px; min-height: 32px; padding: 4px 8px; text-align: right; font-variant-numeric: tabular-nums; }
+.oc-u { color: var(--faint); font-size: 11.5px; white-space: nowrap; }
+.oc-p .help { margin: 3px 0 0; }
+.oc-lim { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 26px; margin-top: 0; }
+.oc-um { min-height: 26px; padding: 2px 9px; font-size: 11.5px; }
+.oc-busy .oc-num { border-color: rgba(60, 200, 255, .45); }
+.oc-dolu { display: flex; justify-content: flex-end; }
+/* Плъзгачът (02_DIZAYN 1.14): линия 4 px, изминатото в акцент, топче 18 px; чертичка на подразбирането;
+   полето за пръста е 28 px с мишка и 44 px на допир */
+.rng {
+  -webkit-appearance: none; appearance: none; display: block; width: 100%; height: 28px; margin: 4px 0 0; cursor: pointer;
+  background: linear-gradient(var(--faint), var(--faint)) no-repeat;
+  background-size: 2px 12px; background-position: calc(8px + (100% - 18px) * var(--dk, 0)) 50%;
+}
+.rng::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: linear-gradient(90deg, var(--accent) var(--p, 0%), var(--line-2) var(--p, 0%)); }
+.rng::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 18px; height: 18px; margin-top: -7px; border-radius: 50%;
+  background: var(--accent); border: 2px solid #0b1118; box-shadow: 0 0 0 1px rgba(60, 200, 255, .45);
+}
+.rng::-moz-range-track { height: 4px; border-radius: 2px; background: var(--line-2); }
+.rng::-moz-range-progress { height: 4px; border-radius: 2px; background: var(--accent); }
+.rng::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: var(--accent); border: 2px solid #0b1118; }
+.rng:focus { outline: none; }
+.rng:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 4px rgba(60, 200, 255, .35); }
+.rng:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 4px rgba(60, 200, 255, .35); }
+.rng:disabled { opacity: .38; cursor: not-allowed; }
+@media (pointer: coarse) {
+  .rng { height: 44px; }
+  .rng::-webkit-slider-thumb { width: 22px; height: 22px; margin-top: -9px; }
+  .oc-num { min-height: 38px; }
+}
 @media (max-width: 1180px) {
   .set { grid-template-columns: minmax(0, 1fr); }
   .set-side { position: static; max-height: none; overflow: visible; order: -1; }

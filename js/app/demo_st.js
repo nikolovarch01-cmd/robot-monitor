@@ -91,6 +91,46 @@ const DEMO_CHASTI = [
   { id: 'ochi', ime: 'Очи', on: 1, e: 1 }, { id: 'zvuk', ime: 'Звук', on: 1, e: 1 }, { id: 'servo', ime: 'Серва', on: 1, e: 1 },
 ];
 
+// Числата на очите (oci p json на P4, фърмуер 4c3eb77): име, по подразбиране, от, до. В демото се помнят до презареждане.
+const DEMO_OCHI = [
+  ['kadri', 60, 10, 70], ['skok_tau', 0.035, 0.005, 0.5], ['sled_tau', 0.04, 0.005, 1], ['ogled_tau', 0.15, 0.01, 2],
+  ['vrashta_tau', 0.45, 0.05, 3], ['vrashta_s', 3, 0, 20], ['migane_ot', 2, 0.5, 30], ['migane_do', 6, 0.5, 60],
+  ['migane_s', 0.17, 0.05, 1], ['migane_dvoyno', 0.15, 0, 1], ['ogled_ot', 0.7, 0.2, 30], ['ogled_do', 3.3, 0.2, 60],
+  ['ogled_golyam', 0.25, 0, 1], ['spi_sled_s', 90, 5, 3600], ['nos_m', 0.018, 0, 0.1], ['zenica', 0.38, 0.15, 0.75],
+  ['zenica_cel', 0.46, 0.15, 0.75], ['zenica_ot_m', 0.35, 0.05, 1], ['zenica_do_m', 0.08, 0.02, 0.5], ['zenica_blizo', 0.14, 0, 0.4],
+  ['mirno', 0.05, 0, 0.3], ['blizo_ot_m', 0.25, 0.03, 0.5], ['blizo_do_m', 0.07, 0.02, 0.4], ['blizo_gore_dolu', 0.3, 0, 1],
+  ['trepet', 1, 0, 5], ['cel_zadarzh_ms', 500, 0, 5000], ['tof_do_mm', 500, 100, 4000], ['tof_lenta_mm', 70, 10, 500],
+  ['tof_fon_mm', 80, 10, 1000], ['kam_prag', 22, 5, 100], ['kam_chast', 0.33, 0.05, 1], ['kam_uspok_ms', 450, 0, 2000],
+  ['kam_pati_ochi', 3, 1, 30], ['kam_pati_glava', 10, 1, 100], ['glava_sled_s', 0.12, 0, 3], ['glava_mrtva', 3, 0, 30],
+  ['glava_spri', 0.7, 0.1, 10], ['glava_tau', 0.12, 0.02, 2], ['glava_dom_s', 2, 0, 30], ['glava_dom_tau', 1.5, 0.1, 10],
+  ['naklon', 30, 0, 45], ['zakasn_8x8', 5, 0, 7], ['zakasn_4x4', 2, 0, 7], ['predv_max_s', 0.2, 0, 1], ['izmer_dyal', 0.7, 0.05, 1],
+  ['iris', 58, 30, 70], ['zenica_dalb', 12, 0, 30], ['zenica_sianie', 0.75, 0, 1.5], ['zenica_stena', 1, 0, 3], ['podsvetka', 0, 0, 1.5],
+].map(([n, d, lo, hi]) => ({ n, v: d, d, lo, hi, o: '' }));
+const DEMO_VIDOVE = ['ochi-v1', 'картинката, без движение', 'картинката, слаби вълни', 'картинката, слаби вълни и малко искри'];
+let demoVid = 2;
+const g3 = (v) => String(+(+v).toPrecision(3));
+
+// „oci p …“ и „oci vid …“: същите отговори като на P4
+function demoOchi(line) {
+  const a = line.trim().split(/\s+/).slice(1);
+  if (a[0] === 'vid') {
+    if (a[1] !== undefined) { const n = +a[1]; if (!(n >= 0 && n < DEMO_VIDOVE.length)) return 'oci vid 0..3\n'; demoVid = n; }
+    return DEMO_VIDOVE.map((ime, i) => (i === demoVid ? '->' : '  ') + ' ' + i + ' ' + ime).join('\n') + '\n';
+  }
+  if (a[0] !== 'p') return null;
+  if (a[1] === 'json') return JSON.stringify({ p: DEMO_OCHI, vid: demoVid, vidove: DEMO_VIDOVE }) + '\n';
+  if (a[1] === 'umolch') { for (const p of DEMO_OCHI) p.v = p.d; return 'всички числа на очите са по подразбиране\n'; }
+  const p = DEMO_OCHI.find((x) => x.n === a[1]);
+  if (!p) return 'няма такова число; oci p дава списъка\n';
+  if (a[2] === 'umolch') p.v = p.d;
+  else if (a[2] !== undefined) {
+    const f = parseFloat(a[2]);
+    if (!isFinite(f) || f < p.lo || f > p.hi) return p.n + ': между ' + g3(p.lo) + ' и ' + g3(p.hi) + '\n';
+    p.v = f;
+  }
+  return p.n + ' = ' + g3(p.v) + ' (записано)\n';
+}
+
 export function fixture(path, post, body) {
   const p = path.split('?')[0];
   if (p === '/api/params') return Promise.resolve({ total: PARAMS.length, got: PARAMS.length, v2: true, groups: GROUPS, p: PARAMS });
@@ -113,6 +153,8 @@ export function fixture(path, post, body) {
       }
       return Promise.resolve(JSON.stringify({ c: DEMO_CHASTI }) + '\n');
     }
+    const oci = /^oci\s+(p|vid)\b/.test(line.trim()) ? demoOchi(line) : null;
+    if (oci !== null) return new Promise((r) => setTimeout(() => r(oci), 60));     // като по Wi-Fi: една заявка трае
     if (/^oci\b/.test(line)) return Promise.resolve('очите включени\nглавата следи: не\nнастройки: inv не\n');
     return Promise.resolve('Демо: няма робот\n');
   }

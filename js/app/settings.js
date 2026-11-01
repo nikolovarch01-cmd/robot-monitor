@@ -6,8 +6,12 @@ import { esc, num, toast, DEMO_NOTE } from './ui.js';
 import { lockDemo } from './lock.js';
 import { initCalib } from './calib.js';
 import { initChasti } from './chasti.js';
+import { initOchi } from './ochi.js';
 import { centrStart, centrDone, curZeroGo, himuCalGo } from './actions.js';
 
+// Подразделите на Настройка (лентата горе, като сетовете на Табло)
+const POD = [['obshti', 'Общи'], ['ochi', 'Очи']];
+const POD_KEY = 'mon.nastroyka.pod';
 const PST = { 0: ['✓', 'ok'], 5: ['✓✓', 'ok'], 1: ['няма', 'bad'], 2: ['извън', 'bad'], 3: ['в покой', 'bad'], 4: ['само чет.', 'bad'] };
 const LOOPS = ['наклон', 'скорост', 'завой'];
 
@@ -24,7 +28,10 @@ function badges(f) {
 export function init(root) {
   root.innerHTML = `
   ${DEMO_NOTE}
-  <div class="set">
+  <div class="tbl-bar" data-keep><div class="tbl-sets" role="tablist" aria-label="Настройка">${POD.map(([id, ime]) =>
+    `<button class="tab-btn mini" type="button" role="tab" data-pod="${id}">${ime}</button>`).join('')}</div></div>
+  <div class="oc" data-pane="ochi" data-keep hidden></div>
+  <div class="set" data-pane="obshti">
     <div class="set-main">
       <div class="card">
         <div class="ct"><span>Параметри на тялото <span class="dim" data-r="pCount"></span></span></div>
@@ -60,6 +67,25 @@ export function init(root) {
   for (const e of root.querySelectorAll('[data-r]')) R[e.dataset.r] = e;
   const calib = initCalib(R.wizCard);
   const chasti = initChasti(R.chasti);
+  const ochi = initOchi(root.querySelector('[data-pane="ochi"]'));
+
+  // ── подразделите: „Общи“ (тялото, калибровките, частите) и „Очи“; изборът се помни в този браузър ──
+  let pod = 'obshti';
+  try { if (localStorage.getItem(POD_KEY) === 'ochi') pod = 'ochi'; } catch (e) { /* без памет: „Общи“ */ }
+  function smeniPod(id, zapomni) {
+    pod = id;
+    for (const b of root.querySelectorAll('[data-pod]')) {
+      b.classList.toggle('on', b.dataset.pod === id);
+      b.setAttribute('aria-selected', b.dataset.pod === id ? 'true' : 'false');
+    }
+    for (const p of root.querySelectorAll('[data-pane]')) p.hidden = p.dataset.pane !== id;
+    if (zapomni) { try { localStorage.setItem(POD_KEY, id); } catch (e) { /* без памет */ } }
+    if (visible && id === 'ochi') ochi.show();
+  }
+  root.querySelector('.tbl-sets').addEventListener('click', (ev) => {
+    const b = ev.target.closest('[data-pod]');
+    if (b && b.dataset.pod !== pod) { smeniPod(b.dataset.pod, true); window.scrollTo(0, 0); }
+  });
 
   const P = { list: [], byId: {}, groups: [], loaded: false };
   let visible = false;
@@ -218,10 +244,11 @@ export function init(root) {
     }
   });
 
+  smeniPod(pod, false);
   lockDemo(root, !isLive());
   return {
-    show() { visible = true; calib.show(); chasti.show(); if (!P.loaded) loadParams(); },
+    show() { visible = true; calib.show(); chasti.show(); if (!P.loaded) loadParams(); if (pod === 'ochi') ochi.show(); },
     hide() { visible = false; calib.hide(); },
-    update(ctx) { chasti.update(ctx); },
+    update(ctx) { chasti.update(ctx); ochi.update(ctx); },
   };
 }
