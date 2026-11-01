@@ -43,6 +43,20 @@ export function toast(msg, bad) {
   setTimeout(() => t.remove(), bad ? 6000 : 3500);
 }
 
+// Съобщение с едно действие (↶ Върни след обратимо действие, 02_DIZAYN 1.3): само бутонът хваща пръста
+export function toastAct(msg, label, fn, ms = 6000) {
+  if (!box) { box = document.createElement('div'); box.id = 'toasts'; box.className = 'toasts'; document.body.appendChild(box); }
+  const t = document.createElement('div');
+  t.className = 'toast toast-act';
+  t.innerHTML = '<span></span><button class="btn mini" type="button"></button>';
+  t.firstChild.textContent = msg;
+  const b = t.lastChild;
+  b.textContent = label;
+  const tm = setTimeout(() => t.remove(), ms);
+  b.addEventListener('click', () => { clearTimeout(tm); t.remove(); fn(); });
+  box.appendChild(t);
+}
+
 // бележка „Демо“ в началото на раздел
 export const DEMO_NOTE = '<div class="demo-note needs-live-note" hidden>Демо: няма робот. Бутоните са изключени.</div>';
 

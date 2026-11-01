@@ -154,6 +154,7 @@ function step() {
   const gx = (hr - m.headRollPrev) / DT, gy = -(hp - m.headPitchPrev) / DT;
   m.headPitchPrev = hp; m.headRollPrev = hr;
   hd.heading = hh; hd.pitch = hp; hd.roll = hr;
+  if (state.kurs.ok) { state.kurs.kurs = hh; state.kurs.kompas = (hh + state.kurs.smut + 360) % 360; }
   hd.gyro[0] = gx + 0.4 * sin(TAU * 5.3 * t);
   hd.gyro[1] = gy + 0.4 * sin(TAU * 4.1 * t + 1);
   hd.gyro[2] = m.yawRate + m.panSpd + 0.4 * sin(TAU * 6.7 * t + 2);
@@ -247,6 +248,9 @@ function tofFrame(t) {
 }
 
 function updateRates(t) {
+  // вид 11: компасът и смущението (сервата в демото леко пречат)
+  { const k = state.kurs, sm = 1.2 * Math.sin(t / 7) + (state.servos.on ? 0.8 : 0);
+    k.ok = true; k.kal = true; k.smut = sm; k.smuten = Math.abs(sm) > 15; }
   // нравът: сам избира любопитен; наложеният от „Нрав“ изтича
   if (!state.nrav.ime) state.nrav.ime = 'lyubopiten';
   if (!state.nrav.sam && (state.nrav.ostava_s -= 1) <= 0) { state.nrav.sam = true; state.nrav.ostava_s = 0; state.nrav.ime = 'lyubopiten'; }

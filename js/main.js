@@ -14,24 +14,16 @@ const PERF = params.has("perf");      // ?perf — раз в 2 s пише в к�
 // ctx.tab: кой раздел се вижда (dash | ctl | plot | set | log | sys). Само изгледите на видимия раздел се обновяват.
 const ctx = { state, hist, now: 0, dt: 0.016, slow: false, tab: 'dash' };
 
-// [име, модул, място, в кои раздели се обновява: 'all' | масив; по подразбиране само Табло]
-// Камерата е и в „Управление“: същата рамка (една картина от робота) се мести там.
+// [име, модул, място, в кои раздели се обновява: 'all' | масив]. Плочките на Табло са в js/dash/tablo.js.
+// Камерата е една за цялото приложение: рамката (една картина от робота) седи в плочката „Камера“ на Табло или
+// в „Управление“; на Табло се обновява само ако плочката я има.
 const VIEWS = [
   ['topbar', './ui/topbar.js', '#topbar', 'all'],
-  ['rates', './ui/rates.js', '#rates'],
-  ['instruments', './ui/instruments.js', '#instruments'],
-  ['camera', './ui/camera.js', '#v-cam', ['dash', 'ctl']],
-  ['depth', './ui/depth.js', '#v-depth'],
-  ['scene3d', './ui/scene3d.js', '#v-3d'],
-  ['battery', './ui/battery.js', '#v-bat'],
-  ['body', './ui/body.js', '#v-body'],
-  ['servos', './ui/servos.js', '#v-servo'],
-  ['sound', './ui/sound.js', '#v-sound'],
-  ['charts', './ui/charts.js', '#charts'],
+  ['camera', './ui/camera.js', '#v-cam-home', ['dash', 'ctl'], (c) => c.tab === 'ctl' || !!(tablo && tablo.camHost())],
 ];
 
 const views = [];
-let app = null;
+let app = null, tablo = null;
 let raf = 0, lastMs = 0, lastSlow = 0, nFrames = 0;
 
 export function frame(ms) {
@@ -45,6 +37,7 @@ export function frame(ms) {
     const v = views[i];
     if (v.dead) continue;
     if (v.tabs !== 'all' && v.tabs.indexOf(ctx.tab) < 0) continue;      // раздел, който не се вижда, не се рисува
+    if (v.when && !v.when(ctx)) continue;
     const t0 = PERF ? performance.now() : 0;
     try { v.update(ctx); } catch (e) { v.dead = true; console.error("[" + v.name + "]", e); }
     if (PERF) v.ms = (v.ms || 0) + performance.now() - t0;
@@ -80,24 +73,11 @@ async function boot() {
   }
   if (!live) startDemo();
 
-  // Кое е голямо: с робот камерата, в демото 3D; изборът с ⇄ се помни (само на това устройство)
-  const colC = document.getElementById('col-c');
-  let big = live ? 'cam' : '3d';
-  try { big = localStorage.getItem('monitor.big') || big; } catch (e) { /* без памет: по подразбиране */ }
-  big = params.get('big') || big;     // ?big=cam | 3d
-  colC.classList.toggle('swap', big === 'cam');
-  for (const b of colC.querySelectorAll('.swap-btn')) {
-    b.addEventListener('click', () => {
-      const cam = colC.classList.toggle('swap');
-      try { localStorage.setItem('monitor.big', cam ? 'cam' : '3d'); } catch (e) { /* няма значение */ }
-    });
-  }
-
-  await Promise.all(VIEWS.map(async ([name, path, sel, tabs]) => {
+  await Promise.all(VIEWS.map(async ([name, path, sel, tabs, when]) => {
     const host = document.querySelector(sel);
     try {
       const mod = await import(path);
-      if (host) views.push({ name, update: mod.init(host, ctx).update, tabs: tabs || ['dash'], order: VIEWS.findIndex((x) => x[0] === name) });
+      if (host) views.push({ name, update: mod.init(host, ctx).update, tabs: tabs || ['dash'], when, order: VIEWS.findIndex((x) => x[0] === name) });
     } catch (e) {
       console.error('[' + name + ']', e);
       if (host) host.insertAdjacentHTML('beforeend', `<div class="miss">„${name}“ не се зареди: ${String(e && e.message || e).slice(0, 120)}</div>`);
@@ -105,10 +85,22 @@ async function boot() {
   }));
   views.sort((a, b) => a.order - b.order);
 
+  // Табло: плочките и сетовете (js/dash/tablo.js). Контролите в плочките питат isLive(), затова то е преди тях.
+  try {
+    const { setLive } = await import('./app/api.js');
+    setLive(live);
+    const { initTablo } = await import('./dash/tablo.js');
+    tablo = await initTablo(document.getElementById('tab-dash'), ctx, { live, params });
+    views.push({ name: 'tablo', update: tablo.update, tabs: ['dash'] });
+  } catch (e) {
+    console.error('[tablo]', e);
+    document.getElementById('tab-dash').insertAdjacentHTML('beforeend', `<div class="miss">Табло не се зареди: ${String(e && e.message || e).slice(0, 160)}</div>`);
+  }
+
   // Раздели, СТОП и JSON каналът към робота (js/app/app.js). Липсващ файл не чупи Табло.
   try {
     const { initApp } = await import('./app/app.js');
-    app = initApp({ live, ctx, state, params });
+    app = initApp({ live, ctx, state, params, tablo });
   } catch (e) {
     console.error('[app]', e);
   }

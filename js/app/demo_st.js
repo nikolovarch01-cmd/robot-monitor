@@ -88,7 +88,7 @@ const SYS = () => ({
 // Частите вкл/изкл (командата vkl на P4): в демото се помнят до презареждане
 const DEMO_CHASTI = [
   { id: 'kam', ime: 'Камера', on: 1, e: 1 }, { id: 'tof', ime: '8×8 отпред', on: 1, e: 1 }, { id: 'zad', ime: 'Отзад', on: 1, e: 1 },
-  { id: 'ochi', ime: 'Очи', on: 1, e: 1 }, { id: 'zvuk', ime: 'Звук', on: 1, e: 1 }, { id: 'servo', ime: 'Серва', on: 0, e: 1 },
+  { id: 'ochi', ime: 'Очи', on: 1, e: 1 }, { id: 'zvuk', ime: 'Звук', on: 1, e: 1 }, { id: 'servo', ime: 'Серва', on: 1, e: 1 },
 ];
 
 export function fixture(path, post, body) {
@@ -107,7 +107,10 @@ export function fixture(path, post, body) {
     const v = /^vkl(?:\s+(\w+)\s+(on|off))?\s*$/.exec(line.trim());
     if (v) {
       const c = DEMO_CHASTI.find((x) => x.id === v[1]);
-      if (c) { c.on = v[2] === 'on' ? 1 : 0; state.izk[c.id] = !c.on; }
+      if (c) {
+        c.on = v[2] === 'on' ? 1 : 0; state.izk[c.id] = !c.on;
+        if (c.id === 'servo') { state.servos.on = !!c.on; state.servos.mode = c.on ? 'on' : 'off'; }    // сервата: от телеметрията
+      }
       return Promise.resolve(JSON.stringify({ c: DEMO_CHASTI }) + '\n');
     }
     if (/^oci\b/.test(line)) return Promise.resolve('очите включени\nглавата следи: не\nнастройки: inv не\n');

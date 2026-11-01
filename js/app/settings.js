@@ -222,6 +222,6 @@ export function init(root) {
   return {
     show() { visible = true; calib.show(); chasti.show(); if (!P.loaded) loadParams(); },
     hide() { visible = false; calib.hide(); },
-    update() {},
+    update(ctx) { chasti.update(ctx); },
   };
 }

@@ -14,6 +14,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uplot@1.6.31/dist/uPlot.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gridstack@11.5.1/dist/gridstack.min.css">
 <link rel="stylesheet" href="css/monitor.css">
 <link rel="stylesheet" href="css/app.css">
 <script type="importmap">
@@ -27,29 +28,10 @@
 
 <header class="topbar" id="topbar"></header>
 
-<!-- Табло: екранът с уредите (както досега) -->
-<div class="tabpane" id="tab-dash">
-  <div class="rates" id="rates"></div>
-
-  <main class="grid">
-    <section class="col col-l" id="instruments"></section>
-
-    <section class="col col-c" id="col-c">
-      <div class="card c-cam"><div id="v-cam"></div><button class="swap-btn" title="Камерата голяма">⇄</button></div>
-      <div class="card c-depth" id="v-depth"></div>
-      <div class="card c-3d"><div id="v-3d"></div><button class="swap-btn" title="3D голямо">⇄</button></div>
-    </section>
-
-    <section class="col col-r">
-      <div class="card c-bat" id="v-bat"></div>
-      <div class="card c-body" id="v-body"></div>
-      <div class="card c-servo" id="v-servo"></div>
-      <div class="card c-sound" id="v-sound"></div>
-    </section>
-  </main>
-
-  <section class="charts" id="charts"></section>
-</div>
+<!-- Табло: плочки в мрежа и сетове (js/dash/tablo.js, 05_TABLA) -->
+<main class="tabpane" id="tab-dash"></main>
+<!-- Домът на камерата: рамката седи тук, когато не е нито в плочка, нито в Управление -->
+<div id="v-cam-home" hidden></div>
 
 <!-- Останалите раздели се пълнят от js/app/*.js -->
 <section class="tabpane app-pane" id="tab-ctl" hidden></section>
@@ -59,6 +41,7 @@
 <section class="tabpane app-pane" id="tab-sys" hidden></section>
 
 <script src="https://cdn.jsdelivr.net/npm/uplot@1.6.31/dist/uPlot.iife.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gridstack@11.5.1/dist/gridstack-all.js"></script>
 <script type="module" src="js/main.js"></script>
 </body>
 </html>

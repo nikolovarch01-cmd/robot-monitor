@@ -22,9 +22,18 @@ export async function postJson(path, body) {
   const r = await fetch(url(path), { method: 'POST', body });
   return r.json();
 }
-// POST с текст (конзолата на P4): отговорът е текстът, който командата е напечатала
+// POST с текст (конзолата на P4): отговорът е текстът, който командата е напечатала.
+// До 8 s: роботът, който не отговаря, не оставя бутоните да чакат завинаги.
+const KONZOLA_MS = 8000;
 export async function konzola(line) {
   if (!live) return fixture('/api/konzola', true, line);
-  const r = await fetch(url('/api/konzola'), { method: 'POST', body: line });
-  return r.text();
+  const ac = new AbortController(), t = setTimeout(() => ac.abort(), KONZOLA_MS);
+  try {
+    const r = await fetch(url('/api/konzola'), { method: 'POST', body: line, signal: ac.signal });
+    return await r.text();
+  } catch (e) {
+    throw new Error('Няма отговор от робота');
+  } finally {
+    clearTimeout(t);
+  }
 }

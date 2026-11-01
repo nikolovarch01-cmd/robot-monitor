@@ -1,14 +1,15 @@
 // Карта 8×8 на VL53L5CX (2D) плюс разстоянието отзад. Рисува се само при нов кадър.
+// Плочка на Табло: ключето за 8×8 е в заглавието, а това за задния датчик е до „Отзад“ (data-k, js/dash/tablo.js).
 import { setText, fmt, distCss, DIST_GRADIENT_CSS } from './util.js';
 
 export function init(root) {
   root.innerHTML = `
-    <div class="ct"><span>Дълбочина 8×8</span><span class="ct-r num" id="dpHz">— к/с</span></div>
+    <div class="ct"><span>8×8</span><span class="ct-r num" id="dpHz">— к/с</span></div>
     <div class="dp-wrap"><canvas class="dp-cv"></canvas></div>
     <div class="dp-leg"><span>0.2 м</span><i style="background:${DIST_GRADIENT_CSS}"></i><span>3 м</span></div>
     <div class="dp-row">
       <div><span class="k">Най-близо</span><b class="num" id="dpMin">—</b></div>
-      <div><span class="k">Отзад</span><b class="num" id="dpRear">—</b></div>
+      <div><span class="k dp-k">Отзад<span data-k="zad"></span></span><b class="num" id="dpRear">—</b></div>
     </div>`;
   const cv = root.querySelector('.dp-cv'), ctx2 = cv.getContext('2d');
   const hz = root.querySelector('#dpHz'), mn = root.querySelector('#dpMin'), rear = root.querySelector('#dpRear');
@@ -69,5 +70,6 @@ export function init(root) {
         setText(rear, ctx.state.izk.zad ? 'изкл.' : r.ok && r.mm != null ? (r.mm / 1000).toFixed(2) + ' м' : '—');
       }
     },
+    destroy() { ro.disconnect(); },
   };
 }

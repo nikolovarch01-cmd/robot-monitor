@@ -1,5 +1,5 @@
 // Приложната част на монитора: раздели, СТОП, JSON каналът към робота, единствената камера.
-// Вика се от main.js след като изгледите на Табло са готови.
+// Вика се от main.js след като плочките на Табло са готови (tablo: js/dash/tablo.js).
 import { initNav, onTab } from './nav.js';
 import { setLive } from './api.js';
 import * as net from '../net_ws.js';
@@ -14,7 +14,7 @@ import { init as initSystem } from './system.js';
 
 const PANES = [['ctl', initControl], ['plot', initPlots], ['set', initSettings], ['log', initLogs], ['sys', initSystem]];
 
-export function initApp({ live, ctx, state, params }) {
+export function initApp({ live, ctx, state, params, tablo }) {
   setLive(live);
   document.body.classList.add(live ? 'is-live' : 'is-demo');
   initStopbar(live);
@@ -34,14 +34,15 @@ export function initApp({ live, ctx, state, params }) {
     setInterval(() => net.injectDemo(makeSt(state, n++)), 100);
   }
 
-  // единствената камера: на Табло (в картата) или на Управление (голяма); в другите раздели потокът е спрян
+  // единствената камера: на Табло (в плочката „Камера“, ако я има) или на Управление (голяма); другаде потокът е спрян
   let camSeen = 0, camStart = Date.now();
   function applyCam(t) {
     const cam = camApi();
     if (!cam) return;
+    const dash = t === 'dash' && tablo ? tablo.camHost() : null;
     if (t === 'ctl' && mods.ctl) { cam.mount(mods.ctl.camHost); cam.setActive(true); }
-    else if (t === 'dash') { cam.mount(null); cam.setActive(true); }
-    else cam.setActive(false);
+    else if (dash) { cam.mount(dash); cam.setActive(true); }
+    else { if (t === 'dash') cam.mount(null); cam.setActive(false); }
     camStart = camSeen = Date.now();
   }
   net.on('st', (s) => {            // кадри не стигат 3 s (спрял поток, умряла връзка): поточи наново (както в телефона)
@@ -64,6 +65,8 @@ export function initApp({ live, ctx, state, params }) {
   onTab((t, prev) => {
     ctx.tab = t;
     if (prev && mods[prev] && mods[prev].hide) mods[prev].hide();
+    if (tablo && prev === 'dash' && t !== 'dash') tablo.hide();
+    if (tablo && t === 'dash' && prev !== 'dash') tablo.show();
     active = mods[t] || null;
     if (active && active.show) active.show();
     applyCam(t);

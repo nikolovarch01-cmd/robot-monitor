@@ -73,7 +73,7 @@ export function init(root) {
     hl: $('#hL'), hr: $('#hR'),
   };
   const lpV = $('#lpV'), lpM = $('#lpM'), lpBar = $('#lpBar'), lpMax = $('#lpMax');
-  const card = root;
+  const card = root.closest('.card') || root;        // плочката избледнява цялата, със заглавието
 
   return {
     update(ctx) {

@@ -1,19 +1,16 @@
 // Раздел „Управление“: камера с HUD, профил, два джойстика (движение и глава), режими, серви, наклон на главата,
 // състояние. Всичко от раздел „Управление“ на телефонното приложение; поведението и текстовете са същите.
-import { net, on, sendOrWarn, driveSet, driveRelease, headSet, onStop, cancelPendingStop } from '../net_ws.js';
-import { stick } from './joystick.js';
-import { esc, fx, STATE_BG, FLAGS, faultInfo, toast, DEMO_NOTE, setT, setH, setC, setW } from './ui.js';
+import { net, on, sendOrWarn } from '../net_ws.js';
+import { fx, STATE_BG, FLAGS, faultInfo, toast, DEMO_NOTE, setT, setH, setC, setW } from './ui.js';
 import { konzola, url, isLive } from './api.js';
 import { camApi } from '../ui/camera.js';
 import { distCss } from '../ui/util.js';
 import { lockDemo } from './lock.js';
 import { centrStart, centrDone } from './actions.js';
 import { initNrav } from './nrav.js';
+// джойстиците, режимите и профилът са общи с плочките на Табло
+import { makeDrive, makeHead, makeRezhimi, makeProfil, centerHeads, releaseDrive, servoAllOn, capText } from './upravlenie.js';
 
-const VMAX = 400, WMAX = 2000;             // mm/s, mrad/s; таваните на профила са в тялото
-const KEY_V = 240, KEY_W = 1200;           // стрелките (около 60% от хода на джойстика)
-const curve = (a) => Math.sign(a) * Math.pow(Math.abs(a), 1.6);
-const r1 = (v) => Math.round(v * 10) / 10;
 const TILT_STEP_US = 4, US_PER_DEG = 3.57;  // всяко натискане мести средата с 4 µs (около 1°)
 
 export function init(root) {
@@ -77,17 +74,12 @@ export function init(root) {
             <span class="small dim" data-r="bbInfo">—</span></div>
         </div>
       </div>
-      <div class="card c-prof">
-        <div class="seg" data-r="prof"><button type="button" data-p="0" title="Бавно и меко: за първи проби и тесни места">Бавен</button><button type="button" data-p="1">Нормален</button><button type="button" data-p="2">Пъргав</button></div>
-      </div>
+      <div class="card c-prof" data-r="profCard"></div>
     </div>
 
     <div class="ctl-col ctl-r">
       <div class="card c-sticks">
-        <div class="sticks">
-          <div class="stick-wrap"><div class="stick" data-r="drive"><div class="knob"></div></div><div class="stick-lbl">движение</div></div>
-          <div class="stick-wrap"><div class="stick headst dim" data-r="head"><div class="knob"></div></div><div class="stick-lbl" data-r="headLbl">глава</div></div>
-        </div>
+        <div class="sticks" data-r="sticks"></div>
         <div class="keyhint small dim">Клавиатура: стрелките карат · Space = СТОП</div>
       </div>
       <div class="card c-nrav" data-r="nravCard"></div>
@@ -98,13 +90,7 @@ export function init(root) {
 
     <div class="ctl-col ctl-a">
       <div class="card c-act">
-        <div class="act-row">
-          <div class="modes">
-            <button class="btn go big" type="button" data-mode="balance">Баланс</button>
-            <button class="btn big" type="button" data-mode="park">Паркирай</button>
-            <button class="btn big" type="button" data-mode="standup">Изправи</button>
-            <button class="btn big" type="button" data-mode="idle">Покой</button>
-          </div>
+        <div class="act-row" data-r="actRow">
           <div class="trim">
             <button class="btn big" type="button" data-act="tiltUp" title="Средата на наклона: −4 µs">Глава ▲ 1°</button>
             <button class="btn big" type="button" data-act="tiltDn" title="Средата на наклона: +4 µs">Глава ▼ 1°</button>
@@ -122,53 +108,18 @@ export function init(root) {
 
   let visible = false;
   let last = null;
-  let srvCap = [7.5, 7.5];
   const lastH = () => (net.st && net.st.h) || {};
-  const servoAllOn = (h) => !!(h && h.sm === 'on' && !(h.cut || []).some(Boolean));
 
-  // ── джойстици ──
-  const driveStick = stick(R.drive, (x, y) => { driveSet(Math.round(-curve(y) * VMAX), Math.round(-curve(x) * WMAX)); }, () => driveRelease(), true);
-  /* Главата: целият ход на джойстика е таванът (h.cap от главата, ±7.5° за първите тестове). Таванът и плавността
-   * (до 20°/s) са в драйвера на P4; тук само се мащабира, за да стига ръката точно до тавана. */
-  const headStick = stick(R.head, (x, y) => { headSet(r1(-x * srvCap[0]), r1(-y * srvCap[1])); }, () => {}, false);
-  onStop(() => { keys.clear(); driveStick.release(); driveStick.place(0, 0); R.drive.classList.remove('held'); headStick.release(); });
+  // ── джойстици, режими, профил (js/app/upravlenie.js; стрелките карат, докато джойстикът се вижда) ──
+  R.sticks.append(makeDrive().el, makeHead().el);
+  R.actRow.prepend(makeRezhimi().el);
+  R.profCard.append(makeProfil().el);
 
-  // ── клавиатура (на компютър): стрелките карат, докато са натиснати; пускане = спиране; Space = СТОП ──
-  const keys = new Set();
-  const typing = (t) => !!t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName));
-  function applyKeys() {
-    let v = 0, w = 0;
-    if (keys.has('ArrowUp')) v += KEY_V;
-    if (keys.has('ArrowDown')) v -= KEY_V;
-    if (keys.has('ArrowLeft')) w += KEY_W;      // + е наляво
-    if (keys.has('ArrowRight')) w -= KEY_W;
-    if (v || w) { driveSet(v, w); driveStick.place(-w / WMAX, -v / VMAX); R.drive.classList.add('held'); }
-    else { driveRelease(); driveStick.place(0, 0); R.drive.classList.remove('held'); }
-  }
-  function releaseKeys() { if (keys.size) { keys.clear(); applyKeys(); } }
-  document.addEventListener('keydown', (ev) => {
-    if (!visible || !net.live || typing(ev.target) || ev.ctrlKey || ev.metaKey || ev.altKey) return;
-    if (ev.code === 'Space') return;        // СТОП: stopbar.js, на всеки раздел (onStop изчиства стрелките)
-    if (/^Arrow(Up|Down|Left|Right)$/.test(ev.key)) {
-      ev.preventDefault();
-      if (!keys.has(ev.key)) { keys.add(ev.key); applyKeys(); }
-    }
-  });
-  document.addEventListener('keyup', (ev) => {
-    if (keys.delete(ev.key)) applyKeys();
-  });
-  window.addEventListener('blur', releaseKeys);
-
-  // ── режими, профил ──
+  // ── камерата, сервата, следенето ──
   root.addEventListener('click', async (ev) => {
     const t = ev.target.closest('button');
     if (!t) return;
-    if (t.dataset.mode) {
-      if (t.dataset.mode !== 'idle') cancelPendingStop();
-      sendOrWarn({ mode: t.dataset.mode });
-    } else if (t.dataset.p !== undefined) {
-      sendOrWarn({ prof: +t.dataset.p });
-    } else if (t.dataset.rez || t.dataset.zoom) {          // размер или мащаб: камерата се прави наново за около половин секунда
+    if (t.dataset.rez || t.dataset.zoom) {          // размер или мащаб: камерата се прави наново за около половин секунда
       setT(R.camInfo, 'сменям...');
       try { await fetch(url('/api/cam?' + (t.dataset.rez ? 'rez=' + t.dataset.rez : 'zoom=' + t.dataset.zoom)), { method: 'POST' }); } catch (e) { /* пак */ }
       setTimeout(() => { const c = camApi(); if (c) c.restart(); }, 1200);
@@ -217,7 +168,7 @@ export function init(root) {
         if (!h.cal) { toast('Първо „Центриране“: без него сервата са без импулси', true); return; }
         sendOrWarn({ cmd: 'servoon' });
         break;
-      case 'center': headStick.place(0, 0); sendOrWarn({ cmd: 'center' }); break;
+      case 'center': centerHeads(); sendOrWarn({ cmd: 'center' }); break;
       case 'centr': if (h.sm === 'cent') centrDone(); else centrStart(); break;
       case 'tiltUp': tiltNudge(-1); break;
       case 'tiltDn': tiltNudge(+1); break;
@@ -252,8 +203,7 @@ export function init(root) {
   function renderServo(h) {
     const sm = h.sm || (h.srv ? 'on' : 'off');
     const cut = (h.cut || []).map((x, i) => x ? (i ? 'tilt' : 'pan') : '').filter(Boolean);
-    if (Array.isArray(h.cap) && h.cap.length === 2 && h.cap.every((v) => v > 0)) srvCap = h.cap;
-    const cap = '±' + fx(h.capset !== undefined ? h.capset : Math.max(srvCap[0], srvCap[1]), 1) + '°';
+    const cap = capText(h);
     let st, cls = 'off';
     if (sm === 'cent') { st = 'центриране: ' + (h.us || [1500, 1500]).join(' / ') + ' µs; сложи рамената, после „Рамената са сложени“'; cls = 'warn'; }
     else if (sm === 'on') { st = 'ограничени ' + cap; cls = 'accent'; }
@@ -279,8 +229,6 @@ export function init(root) {
     setT(btn('centr'), sm === 'cent' ? 'Рамената са сложени' : 'Центриране');
     btn('centr').classList.toggle('acc', sm === 'cent' || !h.cal);
     if (isLive()) btn('center').disabled = sm !== 'on';
-    R.head.classList.toggle('dim', !on);
-    setT(R.headLbl, 'глава ' + cap);
     return sm === 'on' ? 'ограничени ' + cap + (cut.length ? ', СПРЯНО' : '') : sm === 'cent' ? 'центриране' : sm === 'park' ? 'към центъра' : (h.cal ? 'без импулси' : 'не са центрирани');
   }
 
@@ -306,8 +254,6 @@ export function init(root) {
     setT(R.riskv, Math.round(risk * 100) + '%');
     setH(R.flags, FLAGS.filter((f) => (b.fl || 0) & f[0]).map((f) => '<span class="chip warn">' + f[1] + '</span>').join(''));
     setT(R.lAge, b.on ? ('ок' + (b.lost ? ', изп. ' + b.lost + '/s' : '')) : (b.age ? b.age + ' ms' : 'няма'));
-    const d = s.d || {};
-    for (const x of R.prof.children) x.classList.toggle('on', +x.dataset.p === d.prof);
 
     const c = s.c || {};
     setT(R.camInfo, c.ok ? c.w + '×' + c.h + ' · ' + fx(c.fps, 0) + ' прави / ' + fx(c.net, 1) + ' стигат · ' + c.kb + ' kB · к' + c.q : 'няма камера');
@@ -346,7 +292,7 @@ export function init(root) {
       if (last) render(last);
       readFollow();
     },
-    hide() { visible = false; releaseKeys(); driveRelease(); },
+    hide() { visible = false; releaseDrive(); },
     update(ctx) { nrav.update(ctx); },
   };
 }

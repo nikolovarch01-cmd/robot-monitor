@@ -104,6 +104,195 @@ pre.con {
 @media (max-width: 700px) { .toasts { top: 104px; } }
 .toast { background: #10202e; border: 1px solid #2c4660; border-radius: 11px; padding: 10px 13px; box-shadow: 0 8px 28px rgba(0, 0, 0, .55); font-size: 13px; }
 .toast.bad { background: #2c1219; border-color: #7d2a38; color: #ffd9de; }
+/* съобщение с действие (↶ Върни): само то хваща пръста */
+.toast-act { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 8px 6px 13px; pointer-events: auto; }
+
+/* ── Ключето: вкл/изкл на една част (02_DIZAYN 1.14, 05_TABLA). 34×20 на вид, полето за пръста е 44. ── */
+.klyuche {
+  position: relative; flex: none; display: inline-block; width: 34px; height: 20px; padding: 0; margin: 0; border-radius: 999px;
+  cursor: pointer; vertical-align: middle; background: rgba(255, 255, 255, .06); border: 1px solid var(--line-2);
+  transition: background .15s, border-color .15s;
+}
+.klyuche::after { content: ""; position: absolute; inset: -12px -5px; }
+.klyuche i {
+  position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: var(--dim);
+  transition: transform .15s, background .15s;
+}
+.klyuche.on { background: var(--accent-soft); border-color: rgba(60, 200, 255, .45); }
+.klyuche.on i { transform: translateX(14px); background: var(--accent); }
+.klyuche.busy { opacity: .6; cursor: progress; }
+.klyuche.nezn i { transform: translateX(7px); background: var(--faint); }   /* не се знае: топчето в средата */
+.klyuche:disabled, .klyuche.none { opacity: .38; cursor: not-allowed; }
+.klyuche:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .klyuche, .klyuche i { transition: none; } }
+
+/* ── Табло: плочки в мрежа и сетове (js/dash/tablo.js, 05_TABLA). Мрежата е 24 колони, ред 30 px, отстояние 10. ── */
+.tbl { position: relative; }
+.tbl-bar { display: flex; align-items: center; gap: 6px; min-height: 32px; margin: 4px 0 5px; }
+.tbl-sets { display: flex; align-items: center; gap: 2px; min-width: 0; overflow-x: auto; scrollbar-width: none; padding: 8px 1px; margin: -8px 0; }   /* място за полето от 44 px */
+.tbl-sets::-webkit-scrollbar { display: none; }
+.tab-btn.mini { padding: 7px 11px; font-size: 12px; border-radius: 9px; }
+.tbl-sp { flex: 1; }
+.tbl-tools { display: none; align-items: center; gap: 6px; }
+.tbl.podredi .tbl-tools { display: inline-flex; }
+.tbl-tools [data-a="varni"], .tbl-tools [data-a="iztrii"] { margin-right: 14px; }
+/* полето за пръста е 44 px: бутоните са 32 (+6 +6), разделите 28 (+8 +8); на телефона редовете са на 16 px */
+.tbl-bar .btn.mini, .tab-btn.mini { position: relative; }
+.tbl-bar .btn.mini::after { content: ""; position: absolute; inset: -6px -2px; }
+.tab-btn.mini::after { content: ""; position: absolute; inset: -8px -1px; }
+.tbl-note { display: none; margin-right: 6px; }
+.tbl.uzko .tbl-note { display: inline; }                    /* таблет и телефон: колоните са по важност */          /* разрушителното стои далеч от честите (1.3) */
+.btn.mini.bad.armed { color: #fff; background: rgba(255, 93, 108, .3); border-color: var(--bad); }
+.tbl > .miss { padding: 4px 2px 8px; }
+/* малкият прозорец под лентата: „+ Добави“, „Запази като…“ */
+.tbl-pop {
+  position: absolute; z-index: 30; right: 0; top: 42px; width: min(460px, 100%); max-height: min(72vh, 660px); overflow-y: auto;
+  padding: 10px 12px 12px; border-radius: var(--r); background: linear-gradient(180deg, var(--card-2), var(--card));
+  border: 1px solid var(--line-2); box-shadow: 0 8px 28px rgba(0, 0, 0, .55); scrollbar-width: thin;
+}
+.tbl-pop > .ct { margin-bottom: 4px; }
+.pop-g { margin: 10px 0 3px; color: var(--faint); font-size: 10.5px; font-weight: 650; letter-spacing: .09em; text-transform: uppercase; }
+.pop-i {
+  display: block; width: 100%; text-align: left; padding: 7px 10px; border-radius: 9px; cursor: pointer;
+  font: inherit; color: var(--text); background: transparent; border: 1px solid transparent;
+}
+.pop-i:hover:not(:disabled) { background: rgba(60, 200, 255, .08); border-color: rgba(60, 200, 255, .45); }
+.pop-i b { display: flex; align-items: baseline; gap: 8px; font-size: 13px; font-weight: 650; }
+.pop-i b i { font-style: normal; font-weight: 500; font-size: 11px; color: var(--faint); }
+.pop-i span { display: block; margin-top: 1px; color: var(--dim); font-size: 11.5px; line-height: 1.35; }
+.pop-i:disabled { opacity: .38; cursor: not-allowed; }
+.pop-kato { display: flex; gap: 8px; margin: 4px 0 8px; }
+.pop-kato .inp { flex: 1; }
+
+/* мрежата: GridStack слага по 5 px около всяка плочка, затова ръбовете ѝ излизат с толкова */
+.pl-grid { margin: 0 -5px -5px; }
+.grid-stack > .grid-stack-item > .grid-stack-item-content.pl { overflow: hidden; }
+.pl { display: flex; flex-direction: column; }
+.pl > .ct { flex: none; }
+.pl-b { position: relative; flex: 1 1 auto; min-width: 0; min-height: 0; }
+/* видовете рамки: текст и числа (полето на картата), уред (6), картина (0, до ръба), графика (9 10 6), гола лента */
+.pl-karta .pl-b { overflow-x: hidden; overflow-y: auto; scrollbar-width: thin; }
+.pl-ured { padding: 6px; }
+.pl-ured .pl-b { display: flex; align-items: center; justify-content: center; }
+.pl-ured .pl-b > div { width: 100%; height: 100%; }
+.pl-ured .inst-svg { height: 100%; }
+.pl-raw .pl-b > div { height: auto; }
+.pl-kartina { padding: 0; }
+.pl-kartina .pl-b { overflow: hidden; }
+.pl-kam .cam-stage { aspect-ratio: auto; height: 100%; }
+.pl-kam .cam-img { object-fit: contain; }                   /* HUD-ът е „meet“: картината и той съвпадат */
+.pl-grafika .pl-b { display: flex; flex-direction: column; }
+.pl-grafika .plot { flex: 1 1 auto; min-height: 0; height: auto; }
+.pl-gola { padding: 0; background: none; border-color: transparent; box-shadow: none; }
+.pl-gola .pl-b.rates { height: 100%; }
+.pl-tof .pl-b { display: flex; flex-direction: column; }
+.dp-k { display: inline-flex; align-items: center; gap: 7px; }
+.snd-k { flex: none; display: inline-flex; }
+.pl-zvuk .snd { gap: 10px; }
+.pl-palka .pl-b { display: flex; align-items: center; justify-content: center; }
+.pl-rezhimi { padding: 12px; }
+.pl-rezhimi .modes { height: 100%; }
+.pl-profil .seg button { min-height: 44px; }
+/* ключе без заглавие (камерата): стъклено, горе вдясно върху картината (1.12) */
+.pl-kf {
+  position: absolute; z-index: 5; top: 8px; right: 8px; display: inline-flex; padding: 5px 7px; border-radius: 999px;
+  background: rgba(10, 16, 24, .72); border: 1px solid var(--line-2); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+}
+/* компютър: плочките са с размера от мрежата, съдържанието се събира в тях */
+.tbl:not(.uzko) .pl-palka .pl-b { container-type: size; }
+.tbl:not(.uzko) .pl-palka .stick { width: max(60px, min(100cqw, 100cqh - 28px)); }
+/* „Табло“ на 1600×1000 се събира без превъртане: батерията е в 3 реда, звукът в 2, тялото в 12 (02_DIZAYN 2.4) */
+.tbl:not(.uzko) .pl-bat { padding: 8px 12px 9px; }
+.tbl:not(.uzko) .pl-bat > .ct { margin-bottom: 3px; }
+.tbl:not(.uzko) .pl-bat .bat-svg { width: 89px; height: 40px; }
+.tbl:not(.uzko) .pl-bat .bat-pct { line-height: .93; }
+.tbl:not(.uzko) .pl-bat .bat-sub { margin-top: 2px; line-height: 13px; }
+.tbl:not(.uzko) .pl-zvuk { padding: 7px 12px; }
+.tbl:not(.uzko) .pl-zvuk .snd-name, .tbl:not(.uzko) .pl-zvuk .snd-vol { line-height: 1.2; }
+.tbl:not(.uzko) .pl-zvuk .snd-nrav { gap: 0; }
+.tbl:not(.uzko) .pl-tyalo .pit { margin-top: 4px; }
+.tbl:not(.uzko) .pl-tyalo .mtab { margin-top: 4px; }
+.tbl:not(.uzko) .pl-tyalo .loop { margin-top: 5px; }
+.tbl:not(.uzko) .pl-servo .sv-rows { margin-top: 0; }
+/* полето за пръста на ключето в картата не бива да прави превъртане (на компютъра е мишка) */
+/* ключето в реда (звукът, „Отзад“): полето му от 44 px не прави превъртане; картата го реже по ръба си */
+.tbl:not(.uzko) .pl-zvuk .pl-b, .tbl:not(.uzko) .pl-tof .pl-b { overflow: visible; }
+/* по-тесен компютър (1181–1599 px): колоните са по-тесни, затова заглавието се реже с „…“, а дясното му остава цяло */
+.pl > .ct > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.pl-hr { flex: none; white-space: nowrap; }
+.pl-bat .pl-b, .pl-raw .pl-b, .pl-tyalo { container-type: inline-size; }
+@container (max-width: 290px) {
+  .tbl:not(.uzko) .pl-bat .bat-svg { width: 62px; height: 28px; }
+  .pl-bat .bat-row { gap: 10px; }
+  .pl-tyalo #bFault.off { display: none; }               /* „без грешка“ се крие първо; грешката остава */
+}
+@container (max-width: 240px) {
+  .raw-row { grid-template-columns: 54px repeat(3, minmax(0, 1fr)); gap: 5px; }
+  .raw-c { font-size: 11.5px; }
+  .raw-h { letter-spacing: 0; }
+}
+/* звукът: тесен ред без високоговорителя, името се реже с „…“ */
+.pl-zvuk .pl-b { container-type: inline-size; }
+.snd-vol, .snd-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pl-zvuk .snd-txt { overflow: hidden; }
+@container (max-width: 330px) { .pl-zvuk .snd-ic { display: none; } }
+
+/* „Подреди“: пунктирна рамка в акцент, дръжка долу вдясно, ✕ в заглавието; съдържанието не се натиска */
+.pl-ovl, .pl-x { display: none; }
+.tbl.podredi .pl { outline: 1px dashed rgba(60, 200, 255, .6); outline-offset: -1px; border-color: transparent; }
+.tbl.podredi .pl-ovl { display: block; position: absolute; inset: 0; z-index: 6; border-radius: inherit; background: rgba(8, 12, 18, .14); cursor: move; }
+.tbl.uzko.podredi .pl-ovl { cursor: default; }
+.pl-ovl-ime {
+  position: absolute; left: 8px; top: 8px; padding: 3px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 650;
+  color: var(--text); background: rgba(10, 16, 24, .72); border: 1px solid var(--line-2); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+}
+.pl.has-h .pl-ovl-ime { display: none; }
+.tbl.podredi .pl-x {
+  display: inline-flex; align-items: center; justify-content: center; position: relative; z-index: 7; flex: none;
+  width: 24px; height: 24px; padding: 0; border-radius: 7px; cursor: pointer; font: 600 12px/1 var(--font);
+  color: var(--dim); background: rgba(10, 16, 24, .72); border: 1px solid var(--line-2);
+}
+.tbl.podredi .pl-x::after { content: ""; position: absolute; inset: -10px; }
+.tbl.podredi .ct .pl-x { margin: -4px 0; }                 /* заглавието не става по-високо от ✕ */
+.tbl.podredi .pl-x:hover { color: #ffd2d6; border-color: rgba(255, 93, 108, .45); background: rgba(255, 93, 108, .12); }
+.tbl.podredi .pl-ovl .pl-x { position: absolute; top: 7px; right: 7px; }
+.tbl.podredi .swap-btn, .tbl.podredi .pl-kf { display: none; }
+.grid-stack-item > .ui-resizable-handle { z-index: 8 !important; }     /* GridStack пише 100: над лентата и прозореца не бива */
+/* влачената плочка е под горната лента и СТОП (50), не на 10000 като в GridStack (1.10) */
+.grid-stack > .grid-stack-item.ui-draggable-dragging, .grid-stack > .grid-stack-item.ui-resizable-resizing { z-index: 45 !important; }
+.tbl.podredi .grid-stack-item > .ui-resizable-se {
+  width: 20px; height: 20px; right: 7px !important; bottom: 7px !important; transform: none;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="%233cc8ff" stroke-width="2" stroke-linecap="round"><path d="M17 7v10H7M17 12l-5 5"/></svg>') center / 18px no-repeat;
+}
+.grid-stack > .grid-stack-placeholder > .placeholder-content { background: rgba(60, 200, 255, .06); border: 1px dashed rgba(60, 200, 255, .45); border-radius: var(--r); }
+.pl-novo > .pl { box-shadow: 0 0 0 2px rgba(60, 200, 255, .45), 0 8px 28px rgba(0, 0, 0, .38); }
+
+/* таблет и телефон (до 1180 px): колони по важност (02_DIZAYN 2.2), височината е на съдържанието */
+.tbl.uzko .pl-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap); margin: 0; height: auto !important; min-height: 0 !important; }
+.tbl.uzko .pl-grid > .grid-stack-item { position: relative !important; inset: auto !important; width: auto !important; height: auto !important; min-width: 0; order: var(--redT); }
+.tbl.uzko .pl-grid > .grid-stack-item > .grid-stack-item-content { position: relative !important; inset: auto !important; }
+.tbl.uzko .pl-grid > .grid-stack-item.cyal { grid-column: 1 / -1; }
+.tbl.uzko .pl-b { flex: none; }
+.tbl.uzko .pl-karta .pl-b { overflow: visible; }
+.tbl.uzko .pl-ured .pl-b > div, .tbl.uzko .pl-ured .inst-svg { height: auto; }
+.tbl.uzko .pl-kam .cam-stage { aspect-ratio: 4 / 3; height: auto; }
+.tbl.uzko .pl-3d .pl-b { aspect-ratio: 4 / 3; }
+.tbl.uzko .pl-tof .pl-b { display: block; }
+.tbl.uzko .pl-grafika .plot { flex: none; height: 96px; }
+.tbl.uzko .pl-rezhimi .modes { height: auto; }
+.tbl.uzko .pl-palka .stick { width: min(100%, 170px); }
+.tbl.uzko .swap-btn { display: none; }
+@media (max-width: 700px) {
+  .tbl.uzko .pl-grid { grid-template-columns: minmax(0, 1fr); }
+  .tbl.uzko .pl-grid > .grid-stack-item { order: var(--red); }
+  .tbl.uzko .pl-grid > .grid-stack-item.cyal { grid-column: auto; }
+  .tbl.uzko .pl-grafika .plot { height: 140px; }
+  .tbl-bar { flex-wrap: wrap; row-gap: 16px; }
+  .tbl-sets { flex: 1 1 0; }
+  .tbl-sp { display: none; }
+  .tbl.podredi .tbl-tools { order: 5; flex: 1 0 100%; flex-wrap: wrap; row-gap: 16px; }
+  .tbl-pop { position: static; width: auto; max-height: none; margin-bottom: var(--gap); }
+}
 
 /* ── Управление ── */
 .ctl {
@@ -219,13 +408,11 @@ pre.con {
 /* ── Настройка ── */
 .set { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: var(--gap); align-items: start; }
 .set-main, .set-side { display: flex; flex-direction: column; gap: var(--gap); min-width: 0; }
-/* Части: име вляво, сегменти вкл | изкл вдясно (елементът „сегменти“ от каталога) */
+/* Части: име вляво, ключето вдясно (елементът „ключе“ от каталога, 05_TABLA) */
 .parts { margin-top: 6px; }
-.part { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 0; border-top: 1px solid var(--line); }
+.part { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 46px; padding: 0 5px 0 0; border-top: 1px solid var(--line); }   /* 46: полетата от 44 px на ключетата не се застъпват */
 .part-n { font-size: 13px; font-weight: 600; min-width: 0; }
 .part.none .part-n { color: var(--faint); font-weight: 400; }
-.seg-part { flex: none; width: 150px; }
-.seg-part button[data-on="0"].on { background: rgba(255, 255, 255, .06); color: var(--text); }
 .set-side { position: sticky; top: 58px; max-height: calc(100vh - 150px); overflow-y: auto; scrollbar-width: thin; }
 .filter { margin-top: 10px; }
 details.grp { padding: 0; overflow: hidden; }

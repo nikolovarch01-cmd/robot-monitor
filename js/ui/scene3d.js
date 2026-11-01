@@ -254,8 +254,8 @@ export function init(root) {
     camera.updateProjectionMatrix();
     pMat.uniforms.uScale.value = h * renderer.getPixelRatio() / (2 * Math.tan(camera.fov * D2R / 2));
   }
-  new ResizeObserver(resize).observe(stage);
-  new IntersectionObserver((en) => { vis = en[0].isIntersecting; }, { threshold: 0 }).observe(stage);
+  const ro = new ResizeObserver(resize); ro.observe(stage);
+  const io = new IntersectionObserver((en) => { vis = en[0].isIntersecting; }, { threshold: 0 }); io.observe(stage);
   resize();
 
   // ── кнопки ──
@@ -363,6 +363,16 @@ export function init(root) {
 
       controls.update();
       renderer.render(scene, camera);
+    },
+    // махната плочка: спира наблюдателите и освобождава WebGL (геометрии, материали, текстури, контекста)
+    destroy() {
+      ro.disconnect(); io.disconnect(); controls.dispose();
+      scene.traverse((o) => {
+        if (o.geometry) o.geometry.dispose();
+        const ms = Array.isArray(o.material) ? o.material : o.material ? [o.material] : [];
+        for (const m of ms) { if (m.map) m.map.dispose(); m.dispose(); }
+      });
+      renderer.dispose(); renderer.forceContextLoss();
     },
   };
 }

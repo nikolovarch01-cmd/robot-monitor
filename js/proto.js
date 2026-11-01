@@ -21,6 +21,23 @@ const servoPrev = [{ deg: 0, t: 0 }, { deg: 0, t: 0 }];
 
 // Батерия 3S: процент по напрежението на клетка (същата крива като chestoti.c)
 const LIPO = [3.27, 3.61, 3.69, 3.71, 3.73, 3.75, 3.77, 3.79, 3.80, 3.82, 3.84, 3.85, 3.87, 3.91, 3.95, 3.98, 4.02, 4.08, 4.11, 4.15, 4.20];
+// Курсът от компаса шуми около ±1.5° (мерено 2026-11-01: σ 0.5° в покой, скок до 1.7° между два кадъра), а
+// наклонът и кренът са до 0.01°. Без изглаждане компасът, лентата на камерата и 3D треперят 50 пъти в секунда.
+// Изглажда се векторът (cos, sin), не ъгълът: през 0/360 няма скок. τ = 0.2 s: σ пада около 4 пъти, а
+// завъртане на главата изостава с около 0.2 s. Суровото е в head.heading_raw.
+const KURS_TAU = 0.2;
+let kc = null, ks = 0, kt = 0;
+let imaKurs = false;      // P4 праща вид 11: курсът във вид 1 вече е слят (жироскоп + компас), не се изглажда
+function gladak(deg, t) {
+  const r = deg * Math.PI / 180, c = Math.cos(r), s = Math.sin(r);
+  const dt = t - kt;
+  kt = t;
+  if (kc === null || !(dt > 0) || dt > 1) { kc = c; ks = s; }
+  else { const a = 1 - Math.exp(-dt / KURS_TAU); kc += (c - kc) * a; ks += (s - ks) * a; }
+  const out = Math.atan2(ks, kc) * 180 / Math.PI;
+  return out < 0 ? out + 360 : out;
+}
+
 export function lipoPct(vCell) {
   if (vCell <= LIPO[0]) return 0;
   for (let i = 1; i < LIPO.length; i++) {
@@ -103,7 +120,8 @@ export function decode(buf) {
         const h = state.head;
         h.pitch = dv.getInt16(p, true) / 100;
         h.roll = dv.getInt16(p + 2, true) / 100;
-        h.heading = dv.getUint16(p + 4, true) / 100;
+        h.heading_raw = dv.getUint16(p + 4, true) / 100;
+        h.heading = imaKurs ? h.heading_raw : gladak(h.heading_raw, t);
         for (let i = 0; i < 3; i++) {
           h.gyro[i] = dv.getInt16(p + 6 + 2 * i, true) / 10;
           h.acc[i] = dv.getInt16(p + 12 + 2 * i, true) / 1000;
@@ -191,6 +209,19 @@ export function decode(buf) {
         state.rear.mode = dv.getUint8(p + 1);
         const mm = dv.getInt16(p + 2, true);
         state.rear.mm = mm > 0 ? mm : null;
+        break;
+      }
+      case 11: { // курсът на главата: жироскопът, бавно поправян от компаса (сесията „курсът на главата“)
+        imaKurs = true;
+        const k = state.kurs, f = dv.getUint8(p + 12);
+        k.ok = true;
+        k.kurs = dv.getUint16(p, true) / 100;
+        k.kompas = dv.getUint16(p + 2, true) / 100;
+        k.smut = dv.getInt16(p + 4, true) / 100;
+        k.bias = dv.getInt16(p + 6, true) / 100;
+        k.pole = dv.getUint16(p + 8, true) / 1000;
+        k.naklon = dv.getInt16(p + 10, true) / 100;
+        k.kal = (f & 1) !== 0; k.smuten = (f & 2) !== 0; k.chete = (f & 4) !== 0; k.sabira = (f & 8) !== 0;
         break;
       }
       case 10: { // честотите, JSON

@@ -70,7 +70,7 @@ b { font-weight: 650; }
 .tb-clock { font-size: 14px; font-weight: 600; color: var(--text); min-width: 66px; text-align: right; }
 
 /* ── честоти ── */
-.rates { display: flex; gap: var(--gap); margin-bottom: var(--gap); }
+.rates { display: flex; gap: var(--gap); }
 .rate {
   flex: 1 1 0; min-width: 0; padding: 7px 11px 8px; border-radius: 11px; --c: var(--good);
   background: linear-gradient(180deg, var(--card-2), var(--card)); border: 1px solid var(--line);
@@ -106,20 +106,9 @@ b { font-weight: 650; }
 .chip.off { color: var(--faint); }
 .stale { opacity: .55; }
 
-/* ── мрежа ── */
-.grid { display: grid; grid-template-columns: 270px minmax(0, 1fr) 330px; gap: var(--gap); align-items: stretch; margin-bottom: var(--gap); }
-.col { min-width: 0; }
-.col-l, .col-r { display: flex; flex-direction: column; gap: var(--gap); }
-.col-l > .card, .col-r > .card { flex: 1 1 auto; }
-.col-c { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 6fr); grid-template-rows: auto minmax(0, 1fr); gap: var(--gap); }
-.c-cam { grid-column: 1; grid-row: 1; padding: 0; overflow: hidden; }
-.c-depth { grid-column: 1; grid-row: 2; display: flex; flex-direction: column; min-height: 0; }
-.c-3d { grid-column: 2; grid-row: 1 / span 2; padding: 0; overflow: hidden; min-height: 420px; }
-.c-3d > div { position: absolute; inset: 0; }
+/* Мрежата на Табло (плочките, сетовете, „Подреди“) е в app.css: „Табло: плочки“. */
 
 /* ── инструменти ── */
-.inst { padding: 6px; display: flex; flex-direction: column; justify-content: center; }
-.inst > div { width: 100%; }
 .inst-svg { display: block; width: 100%; height: auto; }
 .inst-frame { fill: none; stroke: var(--line-2); stroke-width: 1; }
 .adi-hz { stroke: #fff; stroke-width: 1.8; }
@@ -150,6 +139,7 @@ b { font-weight: 650; }
 .hsi-box { fill: #0a1119; stroke: var(--line-2); }
 .hsi-lbl { fill: var(--dim); font-size: 8px; font-weight: 700; letter-spacing: .1em; }
 .hsi-hdg { fill: #fff; font-size: 16px; font-weight: 700; }
+.hsi-smut.warn { fill: var(--warn); }
 
 .turn-lr { fill: var(--dim); font-size: 11px; font-weight: 700; }
 .turn-val { fill: #fff; font-size: 14px; font-weight: 700; }
@@ -316,9 +306,9 @@ b { font-weight: 650; }
 
 /* ── графики ── */
 .charts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--gap); }
-.c-chart { padding: 9px 10px 6px; }
-.c-chart .ct { margin-bottom: 4px; white-space: nowrap; }
-.c-chart .ct > span:first-child { overflow: hidden; text-overflow: ellipsis; }
+.pl-grafika { padding: 9px 10px 6px; }
+.pl-grafika .ct { margin-bottom: 4px; white-space: nowrap; }
+.pl-grafika .ct > span:first-child { overflow: hidden; text-overflow: ellipsis; }
 .legend { display: inline-flex; gap: 10px; text-transform: none; letter-spacing: 0; font-weight: 500; font-size: 11px; }
 .lg { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
 .lg i { width: 8px; height: 3px; border-radius: 2px; display: inline-block; }
@@ -327,44 +317,21 @@ b { font-weight: 650; }
 .uplot, .uplot * { font-family: var(--font); }
 .uplot { background: transparent; }
 
-/* ── смяна на голямото: камерата голяма, 3D малко (бутонът ⇄, като в приложенията за дронове) ── */
+/* ── смяна на голямото: камерата и 3D си разменят мястото (бутонът ⇄, като в приложенията за дронове) ── */
 .swap-btn {
   position: absolute; z-index: 6; right: 9px; bottom: 9px; width: 30px; height: 30px; border-radius: 9px; cursor: pointer;
   font: 600 15px/1 var(--font); color: var(--dim); background: rgba(10, 16, 24, .72); border: 1px solid var(--line-2);
   -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
 }
 .swap-btn:hover { color: var(--accent); border-color: rgba(60, 200, 255, .45); }
-.col-c:not(.swap) .c-3d .swap-btn, .col-c.swap .c-cam .swap-btn { display: none; }
-@media (min-width: 1181px) {
-  .col-c.swap .c-cam { grid-column: 2; grid-row: 1 / span 2; }
-  .col-c.swap .c-3d { grid-column: 1; grid-row: 1; min-height: 0; aspect-ratio: 4 / 3; }
-  .col-c.swap .c-cam > div, .col-c.swap .cam-stage { height: 100%; }
-  .col-c.swap .cam-stage { aspect-ratio: auto; }
-  .col-c.swap .cam-img { object-fit: contain; }
-}
-@media (max-width: 1180px) { .swap-btn { display: none; } }
 
-/* ── по-тесни екрани: една колона ── */
+/* ── по-тесни екрани ── */
 @media (max-width: 1180px) {
-  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .col { display: contents; }
-  .col-l > .card, .col-r > .card { flex: none; }
-  .c-cam, .c-3d, .c-depth { grid-row: auto; grid-column: auto; }
-  .c-3d { aspect-ratio: 4 / 3; min-height: 0; }
-  .c-cam { order: 1; } .c-3d { order: 2; } .c-bat { order: 3; } .c-sound { order: 4; }
-  .c-adi { order: 5; } .c-hsi { order: 6; } .c-turn { order: 7; } .c-raw { order: 8; }
-  .c-body { order: 9; } .c-servo { order: 10; } .c-depth { order: 11; grid-column: 1 / -1; }
-  .c-depth { display: block; }
-  .dp-wrap { aspect-ratio: 1 / 1; max-width: 320px; margin: 0 auto; min-height: 0; }
-  .charts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dp-wrap { aspect-ratio: 1 / 1; max-width: 320px; margin: 0 auto; min-height: 0; flex: none; }
   .rates { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 @media (max-width: 700px) {
   :root { --pad: 10px; --gap: 9px; }
-  .c-bat { order: 3; } .c-adi { order: 4; } .c-hsi { order: 5; } .c-turn { order: 6; } .c-raw { order: 7; }
-  .c-body { order: 8; } .c-servo { order: 9; } .c-sound { order: 10; } .c-depth { order: 11; grid-column: auto; }
-  .grid { grid-template-columns: minmax(0, 1fr); }
-  .charts { grid-template-columns: minmax(0, 1fr); }
   .rates { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
   .rate { padding: 6px 8px 7px; border-radius: 10px; }
   .rate-top { flex-wrap: wrap; row-gap: 1px; font-size: 11px; }

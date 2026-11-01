@@ -1,8 +1,8 @@
-// Карта „Части“ (Настройка): включване и изключване на датчиците и другите части на главата.
-// Говори с командата „vkl“ на P4 през /api/konzola; изборът се пази на робота и след рестарт.
+// Карта „Части“ (Настройка и плочка на Табло): включване и изключване на датчиците и другите части на главата.
+// Всяка част е ред с име и ключе (ui/klyuche.js, командата „vkl“ на P4); изборът се пази на робота и след рестарт.
 // Изключеното се вижда в лентата със здравето като сиво „изкл.“ (rates.js), не като повреда.
-import { konzola } from './api.js';
-import { esc, toast } from './ui.js';
+import { vkl, klyuche } from '../ui/klyuche.js';
+import { esc } from './ui.js';
 
 export function initChasti(card) {
   card.innerHTML = `
@@ -10,43 +10,31 @@ export function initChasti(card) {
     <div class="small dim">Изключената част не мери, не грее и не пие ток. Горе в лентата е сива „изкл.“.</div>
     <div class="parts" data-keep></div>`;
   const list = card.querySelector('.parts');
-  let busy = false;
+  let keys = [];
 
   function draw(parts) {
+    for (const k of keys) k.destroy();
+    keys = [];
     list.innerHTML = parts.map((p) => `
       <div class="part${p.e ? '' : ' none'}">
         <span class="part-n">${esc(p.ime)}${p.e ? '' : ' <i class="dim">няма я</i>'}</span>
-        <div class="seg seg-part">
-          <button type="button" data-id="${esc(p.id)}" data-on="1" class="${p.e && p.on ? 'on' : ''}"${p.e ? '' : ' disabled'}>вкл</button>
-          <button type="button" data-id="${esc(p.id)}" data-on="0" class="${p.e && !p.on ? 'on' : ''}"${p.e ? '' : ' disabled'}>изкл</button>
-        </div>
       </div>`).join('');
-  }
-
-  // командата печата един ред JSON: {"c":[...]} или {"err":"..."}
-  async function run(line) {
-    const txt = await konzola(line);
-    const a = txt.indexOf('{'), b = txt.lastIndexOf('}');
-    if (a < 0 || b < a) throw new Error('P4 не познава „vkl“ (стар фърмуер?)');
-    const j = JSON.parse(txt.slice(a, b + 1));
-    if (j.err) throw new Error(j.err);
-    return j.c || [];
+    [...list.children].forEach((row, i) => {
+      const k = klyuche(parts[i].id, parts[i].ime);
+      row.appendChild(k.el);
+      keys.push(k);
+    });
   }
 
   async function load() {
-    try { draw(await run('vkl')); }
-    catch (e) { list.innerHTML = `<div class="small warnc">${esc(e.message || e)}</div>`; }
+    try { draw(await vkl('vkl')); }
+    catch (e) { for (const k of keys) k.destroy(); keys = []; list.innerHTML = `<div class="small warnc">${esc(e.message || e)}</div>`; }
   }
 
-  list.addEventListener('click', async (ev) => {
-    const btn = ev.target.closest('button[data-id]');
-    if (!btn || busy || btn.classList.contains('on')) return;
-    busy = true;
-    for (const x of list.querySelectorAll('button')) x.disabled = true;
-    try { draw(await run(`vkl ${btn.dataset.id} ${btn.dataset.on === '1' ? 'on' : 'off'}`)); }
-    catch (e) { toast(e.message || String(e), true); load(); }
-    finally { busy = false; }
-  });
-
-  return { show: load };
+  return {
+    show: load,
+    // състоянието идва и от честотите (веднъж в секунда): ключетата се сверяват с тях
+    update(ctx) { if (ctx.slow) for (const k of keys) k.update(); },
+    destroy() { for (const k of keys) k.destroy(); keys = []; },
+  };
 }

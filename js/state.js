@@ -16,7 +16,8 @@ export const state = {
     ok: false, mag_ok: false,
     pitch: 0,                 // + носът нагоре
     roll: 0,                  // + дясната страна надолу
-    heading: 0,               // 0..360, по компаса
+    heading: 0,               // 0..360, по компаса, изгладен (proto.js, τ 0.2 s)
+    heading_raw: 0,           // 0..360, както идва от P4
     gyro: [0, 0, 0],          // °/s около X, Y, Z (Z + наляво)
     acc: [0, 0, 1],           // g
     mag: [0, 0, 0],           // гаус
@@ -33,6 +34,12 @@ export const state = {
     mm: new Int16Array(64).fill(-1),   // -1 = няма цел; ред 0 е горе, колона 0 е вляво (гледано отзад)
     valid: new Uint8Array(64),
     fov_deg: 45,              // зрителното поле по хоризонтала и по вертикала
+  },
+  kurs: {                     // вид 11: слетият курс и компасът (по-нов фърмуер); ok = идва
+    ok: false, kurs: 0, kompas: 0,
+    smut: 0,                  // °: компасът минус курса, изгладено; колко пречат сервата, моторите, колоните
+    bias: 0, pole: 0, naklon: 0,   // °/s отклонение на жироскопа, G полето, ° под хоризонта
+    kal: false, smuten: false, chete: false, sabira: false,
   },
   rear: { ok: false, mode: 0, mm: null },   // VL53L1X отзад на главата, гледа назад и се върти с нея; mode 0 не мери, 1 късо, 2 дълго
   body: {                     // тялото (XIAO ESP32-C5), STATE2 на 100 Hz и STATE на 20 Hz

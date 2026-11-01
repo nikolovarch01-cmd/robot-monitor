@@ -1,5 +1,6 @@
 // Нрав и звук: какво изразява роботът. Високоговорител с играещи ленти, нравът (сам го избира или е наложен от
 // Управление → Нрав), името и силата на звука. Всичко на един ред: Табло се събира в 1000 px.
+// Ключето за звука е в края на реда (data-k, js/dash/tablo.js): картата няма заглавие.
 import { setText, setStyle, setClass, clamp, NRAVI } from './util.js';
 
 const N = 7;
@@ -17,6 +18,7 @@ export function init(root) {
         <div class="snd-name" id="sndName">тишина</div>
         <div class="snd-vol num" id="sndVol">сила —</div>
       </div>
+      <span class="snd-k" data-k="zvuk"></span>
     </div>`;
   const box = root.querySelector('.snd'), bars = [...root.querySelectorAll('.snd-bars i')];
   const name = root.querySelector('#sndName'), vol = root.querySelector('#sndVol');
