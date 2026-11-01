@@ -78,7 +78,7 @@ export function init(root) {
         </div>
       </div>
       <div class="card c-prof">
-        <div class="seg" data-r="prof"><button type="button" data-p="0">Спокоен</button><button type="button" data-p="1">Нормален</button><button type="button" data-p="2">Пъргав</button></div>
+        <div class="seg" data-r="prof"><button type="button" data-p="0" title="Бавно и меко: за първи проби и тесни места">Бавен</button><button type="button" data-p="1">Нормален</button><button type="button" data-p="2">Пъргав</button></div>
       </div>
     </div>
 
