@@ -237,7 +237,7 @@ pre.con {
 .pl-zvuk .snd-txt { overflow: hidden; }
 @container (max-width: 330px) { .pl-zvuk .snd-ic { display: none; } }
 
-/* „Подреди“: пунктирна рамка в акцент, дръжка долу вдясно, ✕ в заглавието; съдържанието не се натиска */
+/* „Подреди“: пунктирна рамка в акцент, дръжки по страните и в ъглите, ✕ в заглавието; съдържанието не се натиска */
 .pl-ovl, .pl-x { display: none; }
 .tbl.podredi .pl { outline: 1px dashed rgba(60, 200, 255, .6); outline-offset: -1px; border-color: transparent; }
 .tbl.podredi .pl-ovl { display: block; position: absolute; inset: 0; z-index: 6; border-radius: inherit; background: rgba(8, 12, 18, .14); cursor: move; }
@@ -260,10 +260,35 @@ pre.con {
 .grid-stack-item > .ui-resizable-handle { z-index: 8 !important; }     /* GridStack пише 100: над лентата и прозореца не бива */
 /* влачената плочка е под горната лента и СТОП (50), не на 10000 като в GridStack (1.10) */
 .grid-stack > .grid-stack-item.ui-draggable-dragging, .grid-stack > .grid-stack-item.ui-resizable-resizing { z-index: 45 !important; }
-.tbl.podredi .grid-stack-item > .ui-resizable-se {
-  width: 20px; height: 20px; right: 7px !important; bottom: 7px !important; transform: none;
-  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="%233cc8ff" stroke-width="2" stroke-linecap="round"><path d="M17 7v10H7M17 12l-5 5"/></svg>') center / 18px no-repeat;
+/* размерът се хваща от всички страни и ъгли, като прозорец: ъглите са скоби, средата на страните е чертичка в акцент;
+   всичко е вътре в плочката (между плочките са само 10 px) */
+.tbl.podredi .grid-stack-item > .ui-resizable-handle { transform: none; background: none; }
+.tbl.podredi .grid-stack-item > .ui-resizable-n, .tbl.podredi .grid-stack-item > .ui-resizable-s { height: 10px; left: 29px !important; right: 29px !important; }
+.tbl.podredi .grid-stack-item > .ui-resizable-e, .tbl.podredi .grid-stack-item > .ui-resizable-w { width: 10px; top: 29px !important; bottom: 29px !important; }
+.tbl.podredi .grid-stack-item > .ui-resizable-n { top: 5px !important; }
+.tbl.podredi .grid-stack-item > .ui-resizable-s { bottom: 5px !important; }
+.tbl.podredi .grid-stack-item > .ui-resizable-e { right: 5px !important; }
+.tbl.podredi .grid-stack-item > .ui-resizable-w { left: 5px !important; }
+.tbl.podredi .grid-stack-item > .ui-resizable-n, .tbl.podredi .grid-stack-item > .ui-resizable-s {
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 26 4"><path d="M2 2h22" stroke="%233cc8ff" stroke-width="3" stroke-linecap="round"/></svg>') center / 26px 4px no-repeat;
 }
+.tbl.podredi .grid-stack-item > .ui-resizable-e, .tbl.podredi .grid-stack-item > .ui-resizable-w {
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 26"><path d="M2 2v22" stroke="%233cc8ff" stroke-width="3" stroke-linecap="round"/></svg>') center / 4px 26px no-repeat;
+}
+.tbl.podredi .grid-stack-item > .ui-resizable-ne, .tbl.podredi .grid-stack-item > .ui-resizable-nw,
+.tbl.podredi .grid-stack-item > .ui-resizable-se, .tbl.podredi .grid-stack-item > .ui-resizable-sw { width: 18px; height: 18px; }
+.tbl.podredi .grid-stack-item > .ui-resizable-nw { top: 5px !important; left: 5px !important;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" fill="none" stroke="%233cc8ff" stroke-width="2.5" stroke-linecap="round"><path d="M3 12V3h9"/></svg>') center / 18px no-repeat; }
+.tbl.podredi .grid-stack-item > .ui-resizable-ne { top: 5px !important; right: 5px !important;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" fill="none" stroke="%233cc8ff" stroke-width="2.5" stroke-linecap="round"><path d="M6 3h9v9"/></svg>') center / 18px no-repeat; }
+.tbl.podredi .grid-stack-item > .ui-resizable-sw { bottom: 5px !important; left: 5px !important;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" fill="none" stroke="%233cc8ff" stroke-width="2.5" stroke-linecap="round"><path d="M3 6v9h9"/></svg>') center / 18px no-repeat; }
+.tbl.podredi .grid-stack-item > .ui-resizable-se { bottom: 5px !important; right: 5px !important;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" fill="none" stroke="%233cc8ff" stroke-width="2.5" stroke-linecap="round"><path d="M15 6v9H6"/></svg>') center / 18px no-repeat; }
+/* махането не става разтягане: ✕ в заглавието е над скобата горе вдясно, а ✕ върху картина (в слоя на
+   плочката, под дръжките) е вляво от нея */
+.tbl.podredi .pl-x { z-index: 9; }
+.tbl.podredi .pl-ovl .pl-x { right: 26px; }
 .grid-stack > .grid-stack-placeholder > .placeholder-content { background: rgba(60, 200, 255, .06); border: 1px dashed rgba(60, 200, 255, .45); border-radius: var(--r); }
 .pl-novo > .pl { box-shadow: 0 0 0 2px rgba(60, 200, 255, .45), 0 8px 28px rgba(0, 0, 0, .38); }
 

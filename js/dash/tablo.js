@@ -14,6 +14,8 @@ const COLS = 24, ROW = 30, MARGIN = 5;
 const IME_CHAST = { kam: 'Камера', tof: '8×8', zad: 'Задният датчик', zvuk: 'Звук', servo: 'Серва' };
 const ARM_MS = 4000;           // „Изтрий“ и „Върни“: второ натискане в рамките на 4 s
 const VKL_MS = 15000;          // звукът и очите ги няма в честотите: „vkl“ се пита толкова често, докато Табло се вижда
+// Бутонът казва какво прави (Михаил не го намери като „Подреди“: „не виждам как става това“)
+const PODREDI = '✎ Подреди таблото';
 
 // GridStack 11 носи ширините само до 12 колони: 24-те се пишат тук веднъж
 function css24() {
@@ -42,7 +44,7 @@ export async function initTablo(root, ctx, { live, params }) {
         <button class="btn mini" type="button" data-a="kato">Запази като…</button>
         <button class="btn mini" type="button" data-a="dobavi">+ Добави</button>
       </span>
-      <button class="btn mini" type="button" data-a="podredi" aria-pressed="false" title="Местене, размер, добавяне и махане на плочки">Подреди</button>
+      <button class="btn mini" type="button" data-a="podredi" aria-pressed="false" title="Местене, размер, добавяне и махане на плочки">${PODREDI}</button>
       <input type="file" accept=".json,application/json" hidden>
     </div>
     <div class="tbl-pop" hidden></div>
@@ -59,7 +61,9 @@ export async function initTablo(root, ctx, { live, params }) {
     css24();
     grid = GS.init({
       column: COLS, cellHeight: ROW, margin: MARGIN, float: false, animate: true, staticGrid: true,
-      alwaysShowResizeHandle: true, resizable: { handles: 'se' },
+      // размерът се хваща от всички страни и ъгли, като прозорец (Михаил, 2026-11-01: камерата „няма за сменяне на
+      // мащаба около прозореца“; беше само ъгълът долу вдясно)
+      alwaysShowResizeHandle: true, resizable: { handles: 'n,ne,e,se,s,sw,w,nw' },
       draggable: { handle: '.grid-stack-item-content', scroll: true, cancel: '.pl-x,.klyuche,.swap-btn' },
     }, gridEl);
   } else {
@@ -309,7 +313,7 @@ export async function initTablo(root, ctx, { live, params }) {
     podredi = on;
     if (on) releaseDrive();             // в „Подреди“ стрелките не карат
     root.classList.toggle('podredi', on);
-    btnPodredi.textContent = on ? 'Готово' : 'Подреди';
+    btnPodredi.textContent = on ? 'Готово' : PODREDI;
     btnPodredi.classList.toggle('acc', on);
     btnPodredi.setAttribute('aria-pressed', on ? 'true' : 'false');
     if (grid) grid.setStatic(!on || uzko);
