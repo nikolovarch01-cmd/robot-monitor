@@ -106,6 +106,7 @@ const DEMO_OCHI = [
   ['naklon', 30, 0, 45], ['zakasn_8x8', 5, 0, 7], ['zakasn_4x4', 2, 0, 7], ['predv_max_s', 0.2, 0, 1], ['izmer_dyal', 0.7, 0.05, 1],
   ['iris', 58, 30, 70], ['zenica_dalb', 12, 0, 30], ['zenica_sianie', 0.75, 0, 1.5], ['zenica_stena', 1, 0, 3], ['podsvetka', 0, 0, 1.5],
   ['zenica_stesn', 3.5, 0, 14], ['zenica_prasteni', 0, 0, 8], ['prasteni_sila', 0.6, 0, 1],     // P4 5a2ad2a
+  ['tamni_tonove', 0, 0, 1], ['kupol', 0, 0, 1],                                                 // P4 cfdb98c
 ].map(([n, d, lo, hi]) => ({ n, v: d, d, lo, hi, o: '' }));
 const DEMO_VIDOVE = ['ochi-v1', 'картинката, без движение', 'картинката, слаби вълни', 'картинката, слаби вълни и малко искри'];
 let demoVid = 2;
