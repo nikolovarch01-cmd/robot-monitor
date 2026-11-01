@@ -87,7 +87,7 @@ const SYS = () => ({
 
 // Частите вкл/изкл (командата vkl на P4): в демото се помнят до презареждане
 const DEMO_CHASTI = [
-  { id: 'tof', ime: '8×8 отпред', on: 1, e: 1 }, { id: 'zad', ime: 'Отзад', on: 1, e: 1 },
+  { id: 'kam', ime: 'Камера', on: 1, e: 1 }, { id: 'tof', ime: '8×8 отпред', on: 1, e: 1 }, { id: 'zad', ime: 'Отзад', on: 1, e: 1 },
   { id: 'ochi', ime: 'Очи', on: 1, e: 1 }, { id: 'zvuk', ime: 'Звук', on: 1, e: 1 }, { id: 'servo', ime: 'Серва', on: 0, e: 1 },
 ];
 

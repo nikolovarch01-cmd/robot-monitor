@@ -66,18 +66,20 @@ export function init(root) {
     </div>`;
   const stage = root.querySelector('.cam-stage');
   const img = root.querySelector('.cam-img'), ph = root.querySelector('.cam-ph');
+  const phT = root.querySelector('.cam-ph-t'), phS = root.querySelector('.cam-ph-s');
   const hor = root.querySelector('#camHor'), tp = root.querySelector('#camTape');
   const hdg = root.querySelector('#camHdg'), info = root.querySelector('#camInfo'), spd = root.querySelector('#camSpd');
   let url = null;          // адресът на потока (от state.camera.url)
   let shown = null;        // какво е поискано от <img> в момента (адрес или null = нищо)
   let active = true;       // потокът е нужен: раздел Табло или Управление
+  let off = false;         // изключена с ключето (Настройка → Части): потокът не се отваря
   let retryT = 0;
   let holdUntil = 0;       // докато старата връзка се затваря, нова не се отваря (сървърът на робота я забелязва на следващия кадър)
   // Камерата на робота (порт 81) дава картина на ЕДИН зрител. Затова в цялото приложение има само един <img>:
   // тази рамка (stage) се премества между Табло и Управление, а в другите раздели потокът се спира.
   const BLANK = 'data:image/gif;base64,R0lGODlhAQABAAAAACw=';
   function sync() {
-    const want = active && url ? url : null;
+    const want = active && url && !off ? url : null;
     if (want === shown) return;
     if (want && performance.now() < holdUntil) return;      // още не: старият поток се затваря
     shown = want;
@@ -119,6 +121,11 @@ export function init(root) {
     update(ctx) {
       const s = ctx.state, h = s.head, c = s.camera;
       if (c.url !== url) url = c.url;
+      if (!!s.izk.kam !== off) {
+        off = !!s.izk.kam;
+        setText(phT, off ? 'Камерата е изключена' : 'Камера: няма връзка');
+        setText(phS, off ? 'включва се от Настройка → Части' : 'само HUD от IMU на главата');
+      }
       sync();
       const pitch = Math.max(-40, Math.min(40, h.pitch));
       setAttr(hor, 'transform', `translate(320 240) rotate(${(-h.roll).toFixed(1)}) translate(0 ${(pitch * KH).toFixed(1)})`);
@@ -126,7 +133,7 @@ export function init(root) {
       setAttr(tp, 'transform', `translate(${(320 - hd * KT).toFixed(1)} 12)`);
       if (ctx.slow) {
         setText(hdg, String(Math.round(hd) % 360).padStart(3, '0') + '°');
-        setText(info, c.ok ? `${fmt(c.hz, 0)} к/с · ${c.w}×${c.h}` : `няма поток · ${c.w || 640}×${c.h || 480}`);
+        setText(info, off ? 'изкл.' : c.ok ? `${fmt(c.hz, 0)} к/с · ${c.w}×${c.h}` : `няма поток · ${c.w || 640}×${c.h || 480}`);
         setText(spd, fmt(s.body.speed / 1000, 2, true) + ' м/с');
       }
     },

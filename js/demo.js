@@ -250,7 +250,7 @@ function updateRates(t) {
   const dip = (t % 25 > 21.5 && t % 25 < 24);
   const j = (a) => a * (1 + 0.004 * (rand() - 0.5));
   state.rates = [
-    { id: 'cam', ime: 'Камера', hz: +(j(36)).toFixed(1), ok: 30 },
+    { id: 'kam', ime: 'Камера', hz: +(j(36)).toFixed(1), ok: 30 },
     { id: 'tof', ime: 'Дълбочина 8×8', hz: dip ? 12.6 : +(j(14.8)).toFixed(1), ok: 15 },
     { id: 'imu', ime: 'IMU на главата', hz: +(j(199.6)).toFixed(1), ok: 200 },
     { id: 'mag', ime: 'Компас', hz: +(j(40)).toFixed(1), ok: 40 },
