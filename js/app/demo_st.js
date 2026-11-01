@@ -91,7 +91,7 @@ const DEMO_CHASTI = [
   { id: 'ochi', ime: 'Очи', on: 1, e: 1 }, { id: 'zvuk', ime: 'Звук', on: 1, e: 1 }, { id: 'servo', ime: 'Серва', on: 1, e: 1 },
 ];
 
-// Числата на очите (oci p json на P4, фърмуер 4c3eb77): име, по подразбиране, от, до. В демото се помнят до презареждане.
+// Числата на очите (oci p json на P4, фърмуер 4c3eb77 и 5a2ad2a): име, по подразбиране, от, до. В демото се помнят до презареждане.
 const DEMO_OCHI = [
   ['kadri', 60, 10, 70], ['skok_tau', 0.035, 0.005, 0.5], ['sled_tau', 0.04, 0.005, 1], ['ogled_tau', 0.15, 0.01, 2],
   ['vrashta_tau', 0.45, 0.05, 3], ['vrashta_s', 3, 0, 20], ['migane_ot', 2, 0.5, 30], ['migane_do', 6, 0.5, 60],
@@ -105,6 +105,7 @@ const DEMO_OCHI = [
   ['glava_spri', 0.7, 0.1, 10], ['glava_tau', 0.12, 0.02, 2], ['glava_dom_s', 2, 0, 30], ['glava_dom_tau', 1.5, 0.1, 10],
   ['naklon', 30, 0, 45], ['zakasn_8x8', 5, 0, 7], ['zakasn_4x4', 2, 0, 7], ['predv_max_s', 0.2, 0, 1], ['izmer_dyal', 0.7, 0.05, 1],
   ['iris', 58, 30, 70], ['zenica_dalb', 12, 0, 30], ['zenica_sianie', 0.75, 0, 1.5], ['zenica_stena', 1, 0, 3], ['podsvetka', 0, 0, 1.5],
+  ['zenica_stesn', 3.5, 0, 14], ['zenica_prasteni', 0, 0, 8], ['prasteni_sila', 0.6, 0, 1],     // P4 5a2ad2a
 ].map(([n, d, lo, hi]) => ({ n, v: d, d, lo, hi, o: '' }));
 const DEMO_VIDOVE = ['ochi-v1', 'картинката, без движение', 'картинката, слаби вълни', 'картинката, слаби вълни и малко искри'];
 let demoVid = 2;
